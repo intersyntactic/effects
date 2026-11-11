@@ -5,7 +5,7 @@ import 'values.dart';
 /// phone's loads no [ProgramDriver].
 ///
 /// A driver knows the effect it carries out and nothing of who decided it:
-/// it is reached only once that is settled.
+/// it is reached only once that is decided.
 abstract interface class Driver {}
 
 /// Reads and writes files in the journey's working tree. Refuses a path

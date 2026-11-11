@@ -22,7 +22,7 @@ final class Refused extends Outcome<Never> {
 }
 
 /// [text] for the file at [path]. The driver decides whether it may be
-/// written; that [path] stays inside the repo is settled by its type.
+/// written; that [path] stays inside the repo is fixed by its type.
 final class FileText {
   const FileText(this.path, this.text);
 

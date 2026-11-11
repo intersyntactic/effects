@@ -4,7 +4,7 @@ The shared vocabulary of intersyntactic's effects. Tools describe effects in
 these words, the airlock decides on them, and drivers carry them out.
 
 A driver depends on this package alone, so it sees no run, journey path or
-decision: it is reached only once those are settled, by `is_airlock_api`.
+decision: it is reached only once a run is decided, by `is_airlock_api`.
 
 ## What an effect takes and gives back
 
