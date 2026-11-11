@@ -24,9 +24,3 @@ abstract interface class ProgramDriver implements Driver {
     required Report report,
   });
 }
-
-/// Sends requests out of the home. Holds each provider's address and each
-/// sign-in's secret, and adds them; reports what arrives as it arrives.
-abstract interface class NetworkDriver implements Driver {
-  Future<Outcome<Response>> send(Request request, {required Report report});
-}
