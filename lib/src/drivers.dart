@@ -1,5 +1,7 @@
+import 'file.dart';
+import 'outcome.dart';
+import 'program.dart';
 import 'relative_path.dart';
-import 'values.dart';
 import 'web.dart';
 
 /// Operates one part of the world. A machine loads the drivers it can run: a

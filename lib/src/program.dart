@@ -1,35 +1,5 @@
 import 'relative_path.dart';
 
-/// What became of a run.
-sealed class Outcome<O> {
-  const Outcome();
-}
-
-/// It ran, and gave [output].
-final class Ran<O> extends Outcome<O> {
-  const Ran(this.output);
-
-  final O output;
-}
-
-/// It did not run: the airlock denied it, the journey path was stopped, its
-/// driver refused it, or this machine has no driver for its program. An
-/// [Outcome] of every program, since [Never] is a subtype of every type.
-final class Refused extends Outcome<Never> {
-  const Refused(this.why);
-
-  final String why;
-}
-
-/// [text] for the file at [path]. The driver decides whether it may be
-/// written, including whether [path] must stay within its root.
-final class FileText {
-  const FileText(this.path, this.text);
-
-  final RelativePath path;
-  final String text;
-}
-
 /// A program the home can start, by name, such as `git`.
 final class ProgramName {
   const ProgramName._(this.value);
@@ -85,29 +55,6 @@ enum Channel { stdout, stderr }
 
 /// Where a driver reports [Progress] for the run it is carrying out.
 typedef Report = void Function(Progress progress);
-
-/// What a read found.
-sealed class ReadResult {
-  const ReadResult();
-}
-
-final class ReadText extends ReadResult {
-  const ReadText(this.text);
-
-  final String text;
-}
-
-/// No file at the path.
-final class ReadMissing extends ReadResult {
-  const ReadMissing();
-}
-
-/// Written; [replaced] when a file was there before.
-final class Wrote {
-  const Wrote({required this.replaced});
-
-  final bool replaced;
-}
 
 /// What a program did once it started: it [Exited], or it was [Killed].
 ///
