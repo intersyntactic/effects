@@ -1,4 +1,4 @@
-import 'path_in_repo.dart';
+import 'relative_path.dart';
 
 /// What became of a run.
 sealed class Outcome<O> {
@@ -22,11 +22,11 @@ final class Refused extends Outcome<Never> {
 }
 
 /// [text] for the file at [path]. The driver decides whether it may be
-/// written; that [path] stays inside the repo is fixed by its type.
+/// written, including whether [path] must stay within its root.
 final class FileText {
   const FileText(this.path, this.text);
 
-  final PathInRepo path;
+  final RelativePath path;
   final String text;
 }
 
@@ -55,7 +55,7 @@ final class ProgramName {
 /// What a started program is given. How long it may run, and when it is
 /// killed, is the driver's to decide.
 final class Args {
-  const Args(this.args, {this.stdin, this.inFolder = PathInRepo.root});
+  const Args(this.args, {this.stdin, this.inFolder = RelativePath.root});
 
   final List<String> args;
 
@@ -63,8 +63,9 @@ final class Args {
   /// once.
   final String? stdin;
 
-  /// The folder it runs in.
-  final PathInRepo inFolder;
+  /// The folder it runs in, relative to the driver's root. Whether this may
+  /// leave that root is the operator's choice, enforced by the driver.
+  final RelativePath inFolder;
 }
 
 /// What a driver reports while a run is underway, before its outcome.

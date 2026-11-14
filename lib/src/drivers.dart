@@ -1,5 +1,6 @@
-import 'path_in_repo.dart';
+import 'relative_path.dart';
 import 'values.dart';
+import 'web.dart';
 
 /// Operates one part of the world. A machine loads the drivers it can run: a
 /// phone's loads no [ProgramDriver].
@@ -8,10 +9,11 @@ import 'values.dart';
 /// it is reached only once that is decided.
 abstract interface class Driver {}
 
-/// Reads and writes files in the journey's working tree. Refuses a path
-/// whose text stays inside but which a symlink leads out of.
+/// Reads and writes files under its own root. Whether a path may leave that
+/// root — by its text, or by a symlink only the disk can show — is the
+/// operator's choice; this driver is where that choice is enforced.
 abstract interface class FileDriver implements Driver {
-  Future<Outcome<ReadResult>> read(PathInRepo path);
+  Future<Outcome<ReadResult>> read(RelativePath path);
   Future<Outcome<Wrote>> write(FileText file);
 }
 
@@ -23,4 +25,10 @@ abstract interface class ProgramDriver implements Driver {
     Args args, {
     required Report report,
   });
+}
+
+/// Sends requests out of the home. Holds each sign-in's secret and applies
+/// it, so the airlock decides a [Request] without ever seeing one.
+abstract interface class WebDriver implements Driver {
+  Future<Outcome<Sent>> send(Request request);
 }

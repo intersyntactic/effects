@@ -8,5 +8,6 @@
 library;
 
 export 'src/drivers.dart';
-export 'src/path_in_repo.dart';
+export 'src/relative_path.dart';
 export 'src/values.dart';
+export 'src/web.dart';
