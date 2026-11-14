@@ -95,7 +95,8 @@ final class Request {
   final SignIn? signIn;
   final Map<String, String> headers;
 
-  /// What leaves the home, for the record as well as the destination.
+  /// What leaves the home, for the destination alone. [Sent] records this
+  /// send by reference, not by copying it.
   final String? body;
 }
 
