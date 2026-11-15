@@ -108,15 +108,21 @@ const _credentialHeaders = {
   'x-api-key',
 };
 
-/// What a [Request] did: [status], and [created], the id the destination
-/// made of it, when it made one.
+/// What a [Request] did: [status], and either [created] (the id the
+/// destination made of it, when it made one) or [refusedBecause] (why,
+/// when [status] was not 2xx).
 ///
 /// Carries no body: naming what was sent, where it went and what came
 /// back is enough, since what it carried is already elsewhere in the
 /// record.
 final class Sent {
-  const Sent({required this.status, this.created});
+  const Sent({required this.status, this.created, this.refusedBecause});
 
   final int status;
   final String? created;
+
+  /// Why the destination refused a non-2xx [status], in its own words —
+  /// a Teams 400 body, an AADSTS code — so a reader can say why without
+  /// reaching into a log only the driver's host can see.
+  final String? refusedBecause;
 }
