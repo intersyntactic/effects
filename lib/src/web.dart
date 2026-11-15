@@ -95,8 +95,9 @@ final class Request {
   final SignIn? signIn;
   final Map<String, String> headers;
 
-  /// What leaves the home, for the destination alone. [Sent] records this
-  /// send by reference, not by copying it.
+  /// What leaves the home, for the destination alone. [Sent] keeps no copy
+  /// of it: what a reader needs back — the model's output, the person's
+  /// words — is already elsewhere in the record.
   final String? body;
 }
 
@@ -110,8 +111,9 @@ const _credentialHeaders = {
 /// What a [Request] did: [status], and [created], the id the destination
 /// made of it, when it made one.
 ///
-/// Carries no body: a send is recorded by reference, naming what it
-/// carried, where it went and what came back, not a copy of either.
+/// Carries no body: naming what was sent, where it went and what came
+/// back is enough, since what it carried is already elsewhere in the
+/// record.
 final class Sent {
   const Sent({required this.status, this.created});
 
