@@ -115,6 +115,86 @@ void main() {
     });
   });
 
+  group('Start', () {
+    test('round-trips', () {
+      final (program, args) = decodeStart(
+        encodeStart(ProgramName.parse('git')!, Args(['status'])),
+      );
+      expect(program, ProgramName.parse('git'));
+      expect(args.args, ['status']);
+    });
+
+    test('refuses a bad program, naming it', () {
+      expect(
+        () => decodeStart({
+          'program': 'git status',
+          'args': {'args': <String>[]},
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('start.program'),
+          ),
+        ),
+      );
+    });
+  });
+
+  group('ProgramMessage', () {
+    test('a printed line is this JSON', () {
+      expect(
+        encodeProgramMessage(
+          const Reported(Printed(Channel.stderr, 'warning\n')),
+        ),
+        {
+          'kind': 'reported',
+          'progress': {
+            'kind': 'printed',
+            'channel': 'stderr',
+            'text': 'warning\n',
+          },
+        },
+      );
+    });
+
+    test('round-trips Reported', () {
+      final decoded = decodeProgramMessage(
+        encodeProgramMessage(const Reported(Printed(Channel.stdout, 'hi'))),
+      ) as Reported;
+      final printed = decoded.progress as Printed;
+      expect(printed.channel, Channel.stdout);
+      expect(printed.text, 'hi');
+    });
+
+    test('round-trips Finished', () {
+      final decoded = decodeProgramMessage(
+        encodeProgramMessage(
+          Finished(Ran(const Exited(1, stdout: '', stderr: 'no'))),
+        ),
+      ) as Finished;
+      final exited = (decoded.outcome as Ran<ExecResult>).output as Exited;
+      expect(exited.exitCode, 1);
+      expect(exited.stderr, 'no');
+    });
+
+    test('refuses an unknown channel, naming it', () {
+      expect(
+        () => decodeProgramMessage({
+          'kind': 'reported',
+          'progress': {'kind': 'printed', 'channel': 'stdin', 'text': ''},
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('programMessage.progress.channel'),
+          ),
+        ),
+      );
+    });
+  });
+
   group('Origin', () {
     test('round-trips', () {
       final origin = Origin.parse('https://api.example.com')!;

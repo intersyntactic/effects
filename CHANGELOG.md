@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2
+
+- `ProgramMessage`: what a program driver sends back about one run,
+  `Reported(Progress)` while it is underway, then one `Finished(Outcome<ExecResult>)`.
+  `Progress` is unchanged.
+- Codecs for a program run across a wire: `encodeStart`/`decodeStart`
+  (what `ProgramDriver.start` is given), `encodeProgress`/`decodeProgress`
+  and `encodeProgramMessage`/`decodeProgramMessage`. For the airlock ↔
+  program driver service. Purely additive.
+
 ## 0.2.1
 
 - JSON codecs for every type: `RelativePath`, `FileText`, `ProgramName`,

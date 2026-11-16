@@ -153,6 +153,74 @@ ExecResult decodeExecResult(Object? json, [String field = 'execResult']) {
   };
 }
 
+// Start: what ProgramDriver.start is given
+
+Object? encodeStart(ProgramName program, Args args) => {
+  'program': encodeProgramName(program),
+  'args': encodeArgs(args),
+};
+
+(ProgramName, Args) decodeStart(Object? json, [String field = 'start']) {
+  final map = _object(json, field);
+  return (
+    decodeProgramName(map['program'], '$field.program'),
+    decodeArgs(map['args'], '$field.args'),
+  );
+}
+
+// Progress
+
+Object? encodeProgress(Progress progress) => switch (progress) {
+  Printed(:final channel, :final text) => {
+    'kind': 'printed',
+    'channel': channel.name,
+    'text': text,
+  },
+};
+
+Progress decodeProgress(Object? json, [String field = 'progress']) {
+  final map = _object(json, field);
+  return switch (map['kind']) {
+    'printed' => Printed(switch (map['channel']) {
+      'stdout' => Channel.stdout,
+      'stderr' => Channel.stderr,
+      final other => throw FormatException(
+        '$field.channel: not "stdout" or "stderr" ($other)',
+      ),
+    }, _string(map['text'], '$field.text')),
+    final other => throw FormatException('$field.kind: not "printed" ($other)'),
+  };
+}
+
+// ProgramMessage
+
+Object? encodeProgramMessage(ProgramMessage message) => switch (message) {
+  Reported(:final progress) => {
+    'kind': 'reported',
+    'progress': encodeProgress(progress),
+  },
+  Finished(:final outcome) => {
+    'kind': 'finished',
+    'outcome': encodeOutcome(outcome, encodeExecResult),
+  },
+};
+
+ProgramMessage decodeProgramMessage(
+  Object? json, [
+  String field = 'programMessage',
+]) {
+  final map = _object(json, field);
+  return switch (map['kind']) {
+    'reported' => Reported(decodeProgress(map['progress'], '$field.progress')),
+    'finished' => Finished(
+      decodeOutcome(map['outcome'], decodeExecResult, '$field.outcome'),
+    ),
+    final other => throw FormatException(
+      '$field.kind: not "reported" or "finished" ($other)',
+    ),
+  };
+}
+
 // Origin
 
 Object? encodeOrigin(Origin origin) => origin.value.toString();
