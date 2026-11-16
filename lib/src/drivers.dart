@@ -1,3 +1,5 @@
+import 'package:is_path_confinement/is_path_confinement.dart' show isInsideTree;
+
 import 'file.dart';
 import 'outcome.dart';
 import 'program.dart';
@@ -13,7 +15,8 @@ abstract interface class Driver {}
 
 /// Reads and writes files under its own root. Whether a path may leave that
 /// root — by its text, or by a symlink only the disk can show — is the
-/// operator's choice; this driver is where that choice is enforced.
+/// operator's choice; this driver is where that choice is enforced, with
+/// [isInsideTree].
 abstract interface class FileDriver implements Driver {
   Future<Outcome<ReadResult>> read(RelativePath path);
   Future<Outcome<Wrote>> write(FileText file);

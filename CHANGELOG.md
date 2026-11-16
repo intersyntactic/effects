@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3
+
+- Depends on `is_path_confinement` so `FileDriver`'s doc comment can point
+  at `isInsideTree` concretely, instead of describing confinement only in
+  prose. Purely additive: `FileDriver` is still just an interface, no
+  behaviour changes.
+
 ## 0.2.2
 
 - `ProgramMessage`: what a program driver sends back about one run,

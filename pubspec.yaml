@@ -3,13 +3,14 @@ description: >-
   The shared vocabulary of intersyntactic's effects: what reading, writing,
   starting a program and sending out of the home take and give back, and the
   drivers that carry them out.
-version: 0.2.2
+version: 0.2.3
 repository: https://github.com/intersyntactic/effects
 
 environment:
   sdk: ^3.13.0
 
 dependencies:
+  is_path_confinement: ^0.1.0
   path: ^1.9.1
 
 dev_dependencies:
