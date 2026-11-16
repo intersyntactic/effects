@@ -122,7 +122,8 @@ final class Sent {
   final String? created;
 
   /// Why the destination refused a non-2xx [status], in its own words —
-  /// a Teams 400 body, an AADSTS code — so a reader can say why without
-  /// reaching into a log only the driver's host can see.
+  /// a Teams 400 body — so a reader can say why without reaching into a
+  /// log only the driver's host can see. A refused sign-in, where
+  /// nothing was sent, is [Refused], not this.
   final String? refusedBecause;
 }
