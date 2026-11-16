@@ -1,3 +1,4 @@
+import 'outcome.dart';
 import 'relative_path.dart';
 
 /// A program this machine can start, by name, such as `git`.
@@ -80,4 +81,27 @@ final class Killed extends ExecResult {
   const Killed(this.why, {required super.stdout, required super.stderr});
 
   final String why;
+}
+
+/// What a program driver sends back about one run it was asked to start:
+/// any number of [Reported] while the run is underway, then one [Finished].
+///
+/// The driver's [Report] carries [Progress] and its return value carries the
+/// [Outcome]; across a wire both travel as these, in order.
+sealed class ProgramMessage {
+  const ProgramMessage();
+}
+
+/// The driver reported [progress] while the run was underway.
+final class Reported extends ProgramMessage {
+  const Reported(this.progress);
+
+  final Progress progress;
+}
+
+/// The run is over, with [outcome]; nothing follows it.
+final class Finished extends ProgramMessage {
+  const Finished(this.outcome);
+
+  final Outcome<ExecResult> outcome;
 }
