@@ -5,8 +5,8 @@
 final class Origin {
   const Origin._(this.value);
 
-  /// [raw] as an http(s) site, such as `https://smba.trafficmanager.net`,
-  /// or null when it is not one, or carries a path, query, fragment or
+  /// [raw] as an http(s) site, such as `https://api.example.com`, or null
+  /// when it is not one, or carries a path, query, fragment or
   /// credentials.
   static Origin? parse(String raw) {
     final uri = Uri.tryParse(raw.trim());
@@ -34,7 +34,7 @@ final class Origin {
   String toString() => value.toString();
 }
 
-/// One of the person's sign-ins, by name, such as `hart-bot`. Never the
+/// One of the person's sign-ins, by name, such as `some-bot`. Never the
 /// secret: the driver holds that, so it reaches neither a tool nor the
 /// record.
 final class SignIn {
@@ -121,9 +121,9 @@ final class Sent {
   final int status;
   final String? created;
 
-  /// Why the destination refused a non-2xx [status], in its own words —
-  /// a Teams 400 body — so a reader can say why without reaching into a
-  /// log only the driver's host can see. A refused sign-in, where
-  /// nothing was sent, is [Refused], not this.
+  /// Why the destination refused a non-2xx [status], in its own words,
+  /// so a reader can say why without reaching into a log only the
+  /// driver's host can see. A refused sign-in, where nothing was sent,
+  /// is [Refused], not this.
   final String? refusedBecause;
 }
