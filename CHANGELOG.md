@@ -9,6 +9,11 @@
   (what `ProgramDriver.start` is given), `encodeProgress`/`decodeProgress`
   and `encodeProgramMessage`/`decodeProgramMessage`. For the airlock ↔
   program driver service. Purely additive.
+- Fixed `RelativePath.folder` on a path made entirely of `..` segments
+  (e.g. `RelativePath('..')`): it was returning root instead of one level
+  further up again. Shipped broken since 0.1.0, but unreachable until the
+  rename let an escaping path be constructed at all; no known caller hits
+  it, fixed now to close the gap before one does.
 
 ## 0.2.1
 
