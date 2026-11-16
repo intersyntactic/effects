@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+- **Breaking:** `Request.path` is now a `WebPath`, not a plain `String`.
+  `WebPath.parse` refuses anything without a leading `/`, a `//`
+  authority, a `..` segment, or an `@` — ways a path could make a request
+  reach somewhere other than the origin it was decided for. `WebPath.root`
+  replaces the old default of `''`.
+- Pulled the credential-header check out of `Request`'s constructor into
+  an exported `validatedHeaders`, so `is_airlock_api`'s `Post` can apply
+  the same guarantee to its own headers instead of re-declaring the
+  forbidden-header list.
+- From issue #1147's design discussion (`enspyrco/intersyntactic#1147`):
+  `WebPath` is web-driver-0b's finding, `validatedHeaders` is shared with
+  effects-98's.
+
 ## 0.1.3
 
 - Genericize destination examples in `web.dart`'s doc comments

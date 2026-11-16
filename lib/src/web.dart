@@ -62,43 +62,50 @@ final _name = RegExp(r'^[a-z0-9][a-z0-9_-]*$');
 /// What a [Request] asks of its [origin].
 enum Method { get, post, put, patch, delete }
 
-/// Something a [WebDriver] sends to [origin], reaching the world.
-///
-/// [path] is appended to [origin]'s address. [signIn] names who it goes as;
-/// null sends under no sign-in. [headers] never carry a credential: the
-/// sign-in's secret is the driver's to add, so a request naming
-/// `authorization`, `proxy-authorization`, `cookie` or `x-api-key` is an
-/// [ArgumentError].
-final class Request {
-  Request(
-    this.origin, {
-    this.method = Method.get,
-    this.path = '',
-    this.signIn,
-    Map<String, String> headers = const {},
-    this.body,
-  }) : headers = Map.unmodifiable(headers) {
-    for (final name in headers.keys) {
-      if (_credentialHeaders.contains(name.toLowerCase())) {
-        throw ArgumentError.value(
-          name,
-          'headers',
-          "carries a credential, which is the sign-in's",
-        );
-      }
-    }
+/// A path appended to an [Origin]'s address, never able to change which
+/// site is reached: `@evil.example` after `https://a.example` would be a
+/// login to `evil.example` if a path could carry an authority of its own.
+final class WebPath {
+  const WebPath._(this.value);
+
+  static const root = WebPath._('');
+
+  /// [raw] as a path on an origin, or null unless it starts with exactly
+  /// one `/` and carries no `..` segment or `@`, each a way a path could
+  /// name somewhere other than where it was decided to go.
+  static WebPath? parse(String raw) {
+    if (!raw.startsWith('/') || raw.startsWith('//')) return null;
+    if (raw.contains('..') || raw.contains('@')) return null;
+    return WebPath._(raw);
   }
 
-  final Origin origin;
-  final Method method;
-  final String path;
-  final SignIn? signIn;
-  final Map<String, String> headers;
+  final String value;
 
-  /// What reaches the destination alone. [Sent] keeps no copy
-  /// of it: what a reader needs back — the model's output, the person's
-  /// words — is already elsewhere in the record.
-  final String? body;
+  @override
+  bool operator ==(Object other) => other is WebPath && other.value == value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => value;
+}
+
+/// [headers], unmodifiable, or an [ArgumentError] when one of them carries
+/// a credential (`authorization`, `proxy-authorization`, `cookie`,
+/// `x-api-key`): that is a sign-in's secret to add, so it must never be
+/// something a tool wrote and the record kept.
+Map<String, String> validatedHeaders(Map<String, String> headers) {
+  for (final name in headers.keys) {
+    if (_credentialHeaders.contains(name.toLowerCase())) {
+      throw ArgumentError.value(
+        name,
+        'headers',
+        "carries a credential, which is the sign-in's",
+      );
+    }
+  }
+  return Map.unmodifiable(headers);
 }
 
 const _credentialHeaders = {
@@ -107,6 +114,33 @@ const _credentialHeaders = {
   'cookie',
   'x-api-key',
 };
+
+/// Something a [WebDriver] sends to [origin], reaching the world.
+///
+/// [path] is appended to [origin]'s address. [signIn] names who it goes as;
+/// null sends under no sign-in. [headers] are [validatedHeaders]: never a
+/// credential, which is the sign-in's to add.
+final class Request {
+  Request(
+    this.origin, {
+    this.method = Method.get,
+    this.path = WebPath.root,
+    this.signIn,
+    Map<String, String> headers = const {},
+    this.body,
+  }) : headers = validatedHeaders(headers);
+
+  final Origin origin;
+  final Method method;
+  final WebPath path;
+  final SignIn? signIn;
+  final Map<String, String> headers;
+
+  /// What reaches the destination alone. [Sent] keeps no copy
+  /// of it: what a reader needs back — the model's output, the person's
+  /// words — is already elsewhere in the record.
+  final String? body;
+}
 
 /// What a [Request] did: [status], and either [created] (the id the
 /// destination made of it, when it made one) or [refusedBecause] (why,
