@@ -22,8 +22,17 @@ final class RelativePath {
   }
 
   /// The folder this path is in; the root's folder is the root.
+  ///
+  /// `dirname` pops the last segment as text, which is right for a real
+  /// name but wrong for a trailing `..`: a `..` does not name something to
+  /// discard, it means "go up", so the folder that contains it is one level
+  /// further up again, not one level back down the chain.
   RelativePath get folder {
-    final dir = p.posix.dirname(value.isEmpty ? '.' : value);
+    if (value.isEmpty) return root;
+    if (value.split('/').last == '..') {
+      return RelativePath._(p.posix.normalize('$value/..'));
+    }
+    final dir = p.posix.dirname(value);
     return dir == '.' ? root : RelativePath._(dir);
   }
 
