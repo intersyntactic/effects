@@ -21,9 +21,8 @@ decision: it is reached only once a run is decided, by `is_airlock_api`.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output.
 
-Nothing here sends out of the home. A journey path's model calls are made by
-its own loop, which holds only the sign-ins its rules allow; an effect for a
-tool that sends is added when a tool needs one.
+A journey path's prompts are made by its own loop, which holds only the
+sign-ins its rules allow, not through an effect here.
 
 ## Drivers
 

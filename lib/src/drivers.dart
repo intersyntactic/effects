@@ -29,7 +29,7 @@ abstract interface class ProgramDriver implements Driver {
   });
 }
 
-/// Sends requests out of the home. Holds each sign-in's secret and applies
+/// Reaches the world: sends requests. Holds each sign-in's secret and applies
 /// it, so the airlock decides a [Request] without ever seeing one.
 abstract interface class WebDriver implements Driver {
   Future<Outcome<Sent>> send(Request request);

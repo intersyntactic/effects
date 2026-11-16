@@ -62,7 +62,7 @@ final _name = RegExp(r'^[a-z0-9][a-z0-9_-]*$');
 /// What a [Request] asks of its [origin].
 enum Method { get, post, put, patch, delete }
 
-/// Something a [WebDriver] sends out of the home, to [origin].
+/// Something a [WebDriver] sends to [origin], reaching the world.
 ///
 /// [path] is appended to [origin]'s address. [signIn] names who it goes as;
 /// null sends under no sign-in. [headers] never carry a credential: the
@@ -95,7 +95,7 @@ final class Request {
   final SignIn? signIn;
   final Map<String, String> headers;
 
-  /// What leaves the home, for the destination alone. [Sent] keeps no copy
+  /// What reaches the destination alone. [Sent] keeps no copy
   /// of it: what a reader needs back — the model's output, the person's
   /// words — is already elsewhere in the record.
   final String? body;

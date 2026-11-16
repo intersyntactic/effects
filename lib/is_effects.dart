@@ -1,5 +1,5 @@
 /// The shared vocabulary of effects: what reading, writing, starting a
-/// program and sending out of the home take and give back, and the drivers
+/// program and reaching the world take and give back, and the drivers
 /// that carry them out.
 ///
 /// Tools describe effects in these words, the airlock decides on them, and

@@ -1,6 +1,6 @@
 import 'relative_path.dart';
 
-/// A program the home can start, by name, such as `git`.
+/// A program this machine can start, by name, such as `git`.
 final class ProgramName {
   const ProgramName._(this.value);
 
