@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.1
+
+- JSON codecs for every type: `RelativePath`, `FileText`, `ProgramName`,
+  `Args`, `ReadResult`, `Wrote`, `ExecResult`, `Origin`, `Method`,
+  `WebPath`, `SignIn`, headers, `Request`, `Sent`, `Outcome<O>`. Encode
+  to a plain JSON value; decode re-runs the type's own validation and
+  throws `FormatException` on bad input. For the agent loop ↔ airlock
+  and airlock ↔ driver wire (`is_airlock_api` 0.5.0's `Carry`). Purely
+  additive, no breaking changes.
+- `isCredentialHeader` exported alongside `validatedHeaders`, so a
+  caller that needs to check a header without catching `ArgumentError`
+  (an `Error`, never caught by this repo's own convention) can.
+
 ## 0.2.0
 
 - **Breaking:** `Request.path` is now a `WebPath`, not a plain `String`.
