@@ -91,13 +91,18 @@ final class WebPath {
   String toString() => value;
 }
 
-/// [headers], unmodifiable, or an [ArgumentError] when one of them carries
-/// a credential (`authorization`, `proxy-authorization`, `cookie`,
-/// `x-api-key`): that is a sign-in's secret to add, so it must never be
-/// something a tool wrote and the record kept.
+/// Whether [name] is a credential header (`authorization`,
+/// `proxy-authorization`, `cookie`, `x-api-key`): a sign-in's secret to
+/// add, never a tool's or a renderer's to write into the record.
+bool isCredentialHeader(String name) =>
+    _credentialHeaders.contains(name.toLowerCase());
+
+/// [headers], unmodifiable, or an [ArgumentError] when one of them is
+/// [isCredentialHeader]: that is a sign-in's secret to add, so it must
+/// never be something a tool wrote and the record kept.
 Map<String, String> validatedHeaders(Map<String, String> headers) {
   for (final name in headers.keys) {
-    if (_credentialHeaders.contains(name.toLowerCase())) {
+    if (isCredentialHeader(name)) {
       throw ArgumentError.value(
         name,
         'headers',
