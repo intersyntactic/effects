@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+- Genericize destination examples in `web.dart`'s doc comments
+  (`smba.trafficmanager.net`, `hart-bot`): a shared vocabulary shouldn't
+  carry one consumer's deployment details in its examples.
+
 ## 0.1.2
 
 - Fix `refusedBecause`'s doc comment: a refused sign-in (an AADSTS code,
