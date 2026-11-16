@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Fix `refusedBecause`'s doc comment: a refused sign-in (an AADSTS code,
+  nothing sent) is `Refused`, not `Sent.refusedBecause`, which is only
+  for a destination's own refusal of something that did go out.
+
 ## 0.1.1
 
 - `Sent` gains `refusedBecause`, the destination's own reason for a
