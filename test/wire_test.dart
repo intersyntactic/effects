@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:is_effects/is_effects.dart';
 import 'package:test/test.dart';
 
@@ -163,11 +165,12 @@ void main() {
     });
   });
 
-  group('ProgramMessage', () {
+  group('ProgramMessage<ExecResult>', () {
     test('a printed line is this JSON', () {
       expect(
         encodeProgramMessage(
-          const Reported(Printed(Channel.stderr, 'warning\n')),
+          const Reported<ExecResult>(Printed(Channel.stderr, 'warning\n')),
+          encodeExecResult,
         ),
         {
           'kind': 'reported',
@@ -182,8 +185,12 @@ void main() {
 
     test('round-trips Reported', () {
       final decoded = decodeProgramMessage(
-        encodeProgramMessage(const Reported(Printed(Channel.stdout, 'hi'))),
-      ) as Reported;
+        encodeProgramMessage(
+          const Reported<ExecResult>(Printed(Channel.stdout, 'hi')),
+          encodeExecResult,
+        ),
+        decodeExecResult,
+      ) as Reported<ExecResult>;
       final printed = decoded.progress as Printed;
       expect(printed.channel, Channel.stdout);
       expect(printed.text, 'hi');
@@ -192,9 +199,11 @@ void main() {
     test('round-trips Finished', () {
       final decoded = decodeProgramMessage(
         encodeProgramMessage(
-          Finished(Ran(const Exited(1, stdout: '', stderr: 'no'))),
+          Finished<ExecResult>(Ran(const Exited(1, stdout: '', stderr: 'no'))),
+          encodeExecResult,
         ),
-      ) as Finished;
+        decodeExecResult,
+      ) as Finished<ExecResult>;
       final exited = (decoded.outcome as Ran<ExecResult>).output as Exited;
       expect(exited.exitCode, 1);
       expect(exited.stderr, 'no');
@@ -205,7 +214,7 @@ void main() {
         () => decodeProgramMessage({
           'kind': 'reported',
           'progress': {'kind': 'printed', 'channel': 'stdin', 'text': ''},
-        }),
+        }, decodeExecResult),
         throwsA(
           isA<FormatException>().having(
             (e) => e.message,
@@ -214,6 +223,135 @@ void main() {
           ),
         ),
       );
+    });
+
+    // Bytes captured from enspyr-syd's program-driver socket
+    // (infra-5e, 2026-11-17): genericizing Reported/Finished must not move
+    // a single byte on the wire a deployed program_driver still speaks.
+    test('encodes exactly the bytes the deployed driver speaks', () {
+      expect(
+        jsonEncode(
+          encodeProgramMessage(
+            const Reported<ExecResult>(Printed(Channel.stdout, 'out\n')),
+            encodeExecResult,
+          ),
+        ),
+        '{"kind":"reported","progress":'
+        '{"kind":"printed","channel":"stdout","text":"out\\n"}}',
+      );
+      expect(
+        jsonEncode(
+          encodeProgramMessage(
+            Finished<ExecResult>(
+              Ran(const Exited(0, stdout: 'out\n', stderr: 'err\n')),
+            ),
+            encodeExecResult,
+          ),
+        ),
+        '{"kind":"finished","outcome":{"kind":"ran","output":'
+        '{"kind":"exited","exitCode":0,"stdout":"out\\n","stderr":"err\\n"}}}',
+      );
+      expect(
+        jsonEncode(
+          encodeProgramMessage(
+            Finished<ExecResult>(
+              Ran(const Killed('timed out after 5s', stdout: '', stderr: '')),
+            ),
+            encodeExecResult,
+          ),
+        ),
+        '{"kind":"finished","outcome":{"kind":"ran","output":'
+        '{"kind":"killed","why":"timed out after 5s","stdout":"","stderr":""}}}',
+      );
+    });
+  });
+
+  group('ProgramMessage<ModelReply>', () {
+    test('round-trips Finished with a model reply', () {
+      final decoded = decodeProgramMessage(
+        encodeProgramMessage(
+          Finished<ModelReply>(Ran(const ModelReply('hi'))),
+          encodeModelReply,
+        ),
+        decodeModelReply,
+      ) as Finished<ModelReply>;
+      final reply = (decoded.outcome as Ran<ModelReply>).output;
+      expect(reply.text, 'hi');
+    });
+
+    test('"kind" comes before "outcome": infra-5e\'s probe matches on it', () {
+      expect(
+        jsonEncode(
+          encodeProgramMessage(
+            Finished<ModelReply>(const Refused('no sign-in')),
+            encodeModelReply,
+          ),
+        ),
+        startsWith('{"kind":"finished","outcome":{"kind":"refused"'),
+      );
+    });
+  });
+
+  group('ModelCall', () {
+    test('is this JSON, key order and all', () {
+      expect(
+        jsonEncode(
+          encodeModelCall(
+            ModelSignInName.parse('anthropic-api')!,
+            ModelName.parse('claude-opus-5-5')!,
+            'be terse',
+            'hello',
+          ),
+        ),
+        '{"signIn":"anthropic-api","model":"claude-opus-5-5",'
+        '"systemPrompt":"be terse","request":"hello"}',
+      );
+    });
+
+    test('round-trips, byte-exact, even with BOM/NUL/CRLF/non-ASCII', () {
+      const systemPrompt = '﻿  leading and trailing  ';
+      const request = 'line1\r\nline2\x00café';
+      final (signIn, model, decodedPrompt, decodedRequest) = decodeModelCall(
+        encodeModelCall(
+          ModelSignInName.parse('anthropic-api')!,
+          ModelName.parse('claude-opus-5-5')!,
+          systemPrompt,
+          request,
+        ),
+      );
+      expect(signIn, ModelSignInName.parse('anthropic-api'));
+      expect(model, ModelName.parse('claude-opus-5-5'));
+      expect(decodedPrompt, systemPrompt);
+      expect(decodedRequest, request);
+    });
+
+    test('refuses with a FormatException, naming the missing field', () {
+      expect(
+        () => decodeModelCall({
+          'signIn': 'anthropic-api',
+          'model': 'claude-opus-5-5',
+          'systemPrompt': 'be terse',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('refuses a non-object with a FormatException', () {
+      expect(() => decodeModelCall('not an object'), throwsFormatException);
+    });
+
+    test('ignores extra keys', () {
+      final (signIn, model, systemPrompt, request) = decodeModelCall({
+        'signIn': 'anthropic-api',
+        'model': 'claude-opus-5-5',
+        'systemPrompt': 'be terse',
+        'request': 'hello',
+        'caller': 'should be ignored',
+      });
+      expect(signIn, ModelSignInName.parse('anthropic-api'));
+      expect(model, ModelName.parse('claude-opus-5-5'));
+      expect(systemPrompt, 'be terse');
+      expect(request, 'hello');
     });
   });
 
