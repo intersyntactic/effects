@@ -153,7 +153,7 @@ ExecResult decodeExecResult(Object? json, [String field = 'execResult']) {
   };
 }
 
-// Start: what ProgramDriver.start is given
+// Start: what StartsPrograms.start is given
 
 Object? encodeStart(ProgramName program, Args args) => {
   'program': encodeProgramName(program),

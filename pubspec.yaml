@@ -3,7 +3,7 @@ description: >-
   The shared vocabulary of intersyntactic's actions: what reading, writing,
   starting a program and reaching the world take and give back, and the
   drivers that carry them out.
-version: 0.3.0
+version: 0.4.0
 repository: https://github.com/intersyntactic/effects
 
 environment:

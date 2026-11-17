@@ -120,7 +120,8 @@ const _credentialHeaders = {
   'x-api-key',
 };
 
-/// Something a [WebDriver] sends to [origin], reaching the world.
+/// Something a [CarriesOutWebRequests] carries out to [origin], reaching
+/// the world.
 ///
 /// [path] is appended to [origin]'s address. [signIn] names who it goes as;
 /// null sends under no sign-in. [headers] are [validatedHeaders]: never a

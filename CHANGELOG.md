@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- **Breaking:** the four driver interfaces are named for what they can
+  do, not as a thing — Nick's ruling, after `implements WebDriver` read
+  as "WebDriver is an api?": `Driver` → `CarriesOutActions`, `FileDriver`
+  → `ReadsAndWritesFiles`, `ProgramDriver` → `StartsPrograms`,
+  `WebDriver` → `CarriesOutWebRequests`. No deprecated alias kept.
+
 ## 0.3.0
 
 - **Breaking:** `WebDriver.send` is now `carryOutWebRequest`; `Sent` is

@@ -35,9 +35,9 @@ sign-ins its rules allow, not through an action here.
 
 ## Drivers
 
-`FileDriver`, `ProgramDriver` (reporting progress as it goes) and
-`WebDriver`. A machine loads the drivers it can run: a phone's loads no
-`ProgramDriver`.
+`ReadsAndWritesFiles`, `StartsPrograms` (reporting progress as it goes) and
+`CarriesOutWebRequests`. A machine loads the drivers it can run: a phone's
+loads no `StartsPrograms`.
 
 The library imports only `path` and `is_path_confinement` outside the SDK;
 a test reads every directive's URI from Dart's parse tree and holds it to
