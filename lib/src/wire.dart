@@ -204,21 +204,25 @@ Progress decodeProgress(Object? json, [String field = 'progress']) {
   };
 }
 
-// ProgramMessage
+// ProgramMessage<O>
 
-Object? encodeProgramMessage(ProgramMessage message) => switch (message) {
+Object? encodeProgramMessage<O>(
+  ProgramMessage<O> message,
+  Object? Function(O output) encodeOutput,
+) => switch (message) {
   Reported(:final progress) => {
     'kind': 'reported',
     'progress': encodeProgress(progress),
   },
   Finished(:final outcome) => {
     'kind': 'finished',
-    'outcome': encodeOutcome(outcome, encodeExecResult),
+    'outcome': encodeOutcome(outcome, encodeOutput),
   },
 };
 
-ProgramMessage decodeProgramMessage(
-  Object? json, [
+ProgramMessage<O> decodeProgramMessage<O>(
+  Object? json,
+  O Function(Object? json, String field) decodeOutput, [
   String field = 'programMessage',
 ]) {
   final map = _object(json, field);
@@ -226,7 +230,7 @@ ProgramMessage decodeProgramMessage(
   return switch (map['kind']) {
     'reported' => Reported(decodeProgress(map['progress'], '$field.progress')),
     'finished' => Finished(
-      decodeOutcome(map['outcome'], decodeExecResult, '$field.outcome'),
+      decodeOutcome(map['outcome'], decodeOutput, '$field.outcome'),
     ),
     final other => throw FormatException(
       '$field.kind: not "reported" or "finished" ($other)',
@@ -304,6 +308,35 @@ Object? encodeModelReply(ModelReply reply) => reply.text;
 
 ModelReply decodeModelReply(Object? json, [String field = 'modelReply']) =>
     ModelReply(_string(json, field));
+
+// ModelCall: the {signIn, model, systemPrompt, request} envelope sent over
+// the socket to an AsksTheModel service, so a caller and the service can't
+// disagree on field names or order.
+
+Object? encodeModelCall(
+  ModelSignInName signIn,
+  ModelName model,
+  String systemPrompt,
+  String request,
+) => {
+  'signIn': encodeModelSignInName(signIn),
+  'model': encodeModelName(model),
+  'systemPrompt': systemPrompt,
+  'request': request,
+};
+
+(ModelSignInName, ModelName, String, String) decodeModelCall(
+  Object? json, [
+  String field = 'modelCall',
+]) {
+  final map = _object(json, field);
+  return (
+    decodeModelSignInName(map['signIn'], '$field.signIn'),
+    decodeModelName(map['model'], '$field.model'),
+    _string(map['systemPrompt'], '$field.systemPrompt'),
+    _string(map['request'], '$field.request'),
+  );
+}
 
 // Headers
 

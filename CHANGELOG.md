@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.8.0
+
+- **Breaking:** `ProgramMessage` (and its two cases, `Reported` and
+  `Finished`) now takes a type parameter for the outcome: `Finished<O>`
+  carries an `Outcome<O>`, the same way `encodeOutcome`/`decodeOutcome`
+  already took an output codec. `encodeProgramMessage`/
+  `decodeProgramMessage` each take that codec too. This is a Dart-types-
+  only change — the JSON bytes for `ProgramMessage<ExecResult>` are
+  unchanged (pinned by a golden-bytes test against lines captured from
+  the deployed `program_driver` socket, infra-5e) — but it is still
+  source-breaking for any exhaustive switch or decode call written
+  against the old non-generic types. A driver can now carry
+  `Finished<ModelReply>` down the same wire a `RunsPrograms` driver
+  already used for `Finished<ExecResult>`, instead of hand-rolling its
+  own envelope (claude_code_driver did exactly that, flagged by
+  web-driver-0b).
+- New, purely additive: `encodeModelCall`/`decodeModelCall`, a codec for
+  the `{signIn, model, systemPrompt, request}` envelope a caller sends
+  an `AsksTheModel` service, agreed field-for-field with
+  claude-code-driver-9f so the airlock and a model driver can't
+  disagree on the shape. `systemPrompt` and `request` pass through
+  byte-exact — no trimming or normalising. `decodeModelCall` throws
+  `FormatException`, never another exception type, on anything it
+  can't read, since a service on the other end treats that one type as
+  "refuse the call" and anything else as a crash.
+
 ## 0.7.0
 
 - **Breaking:** `Progress` gains `ReplyArriving`, a piece of the model's

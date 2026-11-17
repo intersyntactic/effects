@@ -1,3 +1,4 @@
+import 'model.dart';
 import 'outcome.dart';
 import 'relative_path.dart';
 
@@ -93,24 +94,25 @@ final class Killed extends ExecResult {
 
 /// What a program driver sends back about one action it was asked to start:
 /// any number of [Reported] while the action is underway, then one
-/// [Finished].
+/// [Finished] with an [Outcome] of [O] — an [ExecResult] for a started
+/// program, a [ModelReply] for a model call.
 ///
 /// The driver's [Report] carries [Progress] and its return value carries the
 /// [Outcome]; across a wire both travel as these, in order.
-sealed class ProgramMessage {
+sealed class ProgramMessage<O> {
   const ProgramMessage();
 }
 
 /// The driver reported [progress] while the action was underway.
-final class Reported extends ProgramMessage {
+final class Reported<O> extends ProgramMessage<O> {
   const Reported(this.progress);
 
   final Progress progress;
 }
 
 /// The action is over, with [outcome]; nothing follows it.
-final class Finished extends ProgramMessage {
+final class Finished<O> extends ProgramMessage<O> {
   const Finished(this.outcome);
 
-  final Outcome<ExecResult> outcome;
+  final Outcome<O> outcome;
 }
