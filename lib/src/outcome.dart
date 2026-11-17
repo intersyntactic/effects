@@ -10,7 +10,7 @@ final class Ran<O> extends Outcome<O> {
   final O output;
 }
 
-/// It did not run: the airlock denied it, the journey path was stopped, its
+/// It did not run: the airlock denied it, the trajectory was stopped, its
 /// driver refused it, or this machine has no driver for its program. An
 /// [Outcome] of every program, since [Never] is a subtype of every type.
 final class Refused extends Outcome<Never> {

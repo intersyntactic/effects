@@ -3,7 +3,7 @@
 The shared vocabulary of intersyntactic's actions: what a tool's action
 describes, the airlock decides on, and a driver carries out.
 
-A driver is given only the action's program and input; the journey path,
+A driver is given only the action's program and input; the trajectory,
 the decision and what follows stay with `is_airlock_api`.
 
 ## What an action takes and gives back
@@ -30,7 +30,7 @@ the decision and what follows stay with `is_airlock_api`.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output.
 
-A journey path's prompts are made by its own loop, which holds only the
+A trajectory's prompts are made by its own loop, which holds only the
 sign-ins its rules allow, not through an action here.
 
 ## Drivers
