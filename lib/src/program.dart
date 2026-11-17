@@ -54,6 +54,14 @@ final class Printed extends Progress {
 
 enum Channel { stdout, stderr }
 
+/// A piece of the model's reply as it arrives. Never recorded: only the
+/// whole reply, once the call is over, is kept.
+final class ReplyArriving extends Progress {
+  const ReplyArriving(this.text);
+
+  final String text;
+}
+
 /// Where a driver reports [Progress] for the action it is carrying out.
 typedef Report = void Function(Progress progress);
 

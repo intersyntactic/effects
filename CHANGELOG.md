@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.0
+
+- **Breaking:** `Progress` gains `ReplyArriving`, a piece of the model's
+  reply as it streams, never recorded. A new sealed-class case is
+  breaking for any exhaustive switch over `Progress` outside this
+  package.
+- The model call is now an action, reversing the 2026-11-12 ruling that
+  it stayed on the agent's side: the loop that proposes a call holds no
+  model sign-in and reaches the model only through a driver (RULINGS.md,
+  "the model call goes through the airlock"). New, purely additive:
+  `ModelSignInName` (a model sign-in by name, never the secret, built
+  like `SignIn`), `ModelName` (a model id, a checked string), `ModelReply`
+  (the response body's raw text, kept whole, recorded once as an
+  outcome), and `AsksTheModel`, named for what it does: holds every model
+  sign-in, so `askTheModel(signIn, model, request, {required report})`
+  is the only way off this machine for a model call. `request` is the
+  exact body the airlock approved, byte for byte.
+
 ## 0.6.0
 
 - **Breaking:** `encodeStart`/`decodeStart` are now

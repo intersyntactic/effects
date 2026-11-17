@@ -1,4 +1,5 @@
 import 'file.dart';
+import 'model.dart';
 import 'outcome.dart';
 import 'program.dart';
 import 'relative_path.dart';
@@ -181,6 +182,7 @@ Object? encodeProgress(Progress progress) => switch (progress) {
     'channel': channel.name,
     'text': text,
   },
+  ReplyArriving(:final text) => {'kind': 'replyArriving', 'text': text},
 };
 
 Progress decodeProgress(Object? json, [String field = 'progress']) {
@@ -195,7 +197,10 @@ Progress decodeProgress(Object? json, [String field = 'progress']) {
         '$field.channel: not "stdout" or "stderr" ($other)',
       ),
     }, _string(map['text'], '$field.text')),
-    final other => throw FormatException('$field.kind: not "printed" ($other)'),
+    'replyArriving' => ReplyArriving(_string(map['text'], '$field.text')),
+    final other => throw FormatException(
+      '$field.kind: not "printed" or "replyArriving" ($other)',
+    ),
   };
 }
 
@@ -269,6 +274,36 @@ SignIn decodeSignIn(Object? json, [String field = 'signIn']) {
   return SignIn.parse(raw) ??
       (throw FormatException('$field: not a sign-in ($raw)'));
 }
+
+// ModelSignInName
+
+Object? encodeModelSignInName(ModelSignInName signIn) => signIn.name;
+
+ModelSignInName decodeModelSignInName(
+  Object? json, [
+  String field = 'modelSignIn',
+]) {
+  final raw = _string(json, field);
+  return ModelSignInName.parse(raw) ??
+      (throw FormatException('$field: not a model sign-in ($raw)'));
+}
+
+// ModelName
+
+Object? encodeModelName(ModelName model) => model.value;
+
+ModelName decodeModelName(Object? json, [String field = 'model']) {
+  final raw = _string(json, field);
+  return ModelName.parse(raw) ??
+      (throw FormatException('$field: not a model name ($raw)'));
+}
+
+// ModelReply
+
+Object? encodeModelReply(ModelReply reply) => reply.text;
+
+ModelReply decodeModelReply(Object? json, [String field = 'modelReply']) =>
+    ModelReply(_string(json, field));
 
 // Headers
 
