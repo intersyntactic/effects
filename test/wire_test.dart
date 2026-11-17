@@ -115,10 +115,10 @@ void main() {
     });
   });
 
-  group('Start', () {
+  group('ProgramToRun', () {
     test('round-trips', () {
-      final (program, args) = decodeStart(
-        encodeStart(ProgramName.parse('git')!, Args(['status'])),
+      final (program, args) = decodeProgramToRun(
+        encodeProgramToRun(ProgramName.parse('git')!, Args(['status'])),
       );
       expect(program, ProgramName.parse('git'));
       expect(args.args, ['status']);
@@ -126,7 +126,7 @@ void main() {
 
     test('refuses a bad program, naming it', () {
       expect(
-        () => decodeStart({
+        () => decodeProgramToRun({
           'program': 'git status',
           'args': {'args': <String>[]},
         }),
@@ -134,7 +134,7 @@ void main() {
           isA<FormatException>().having(
             (e) => e.message,
             'message',
-            contains('start.program'),
+            contains('programToRun.program'),
           ),
         ),
       );

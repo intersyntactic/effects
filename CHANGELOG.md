@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0
+
+- **Breaking:** `encodeStart`/`decodeStart` are now
+  `encodeProgramToRun`/`decodeProgramToRun`; the error-label default
+  `'start'` is now `'programToRun'`. Flagged after 0.5.0 retired
+  `StartsPrograms`/`start` as fossil words still naming this codec pair
+  and its own error messages. `ProgramToRun` over `RunProgram`: this
+  encodes data (the program and its args), not an instruction. No JSON
+  key changes — `'start'` was only ever the error-message field label —
+  so this needs no coordinated redeploy. No deprecated alias kept.
+
 ## 0.5.0
 
 - **Breaking:** `StartsPrograms` is now `RunsPrograms`; its `start` is now

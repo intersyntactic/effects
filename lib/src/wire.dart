@@ -155,14 +155,17 @@ ExecResult decodeExecResult(Object? json, [String field = 'execResult']) {
   };
 }
 
-// Start: what RunsPrograms.runProgram is given
+// ProgramToRun: what RunsPrograms.runProgram is given
 
-Object? encodeStart(ProgramName program, Args args) => {
+Object? encodeProgramToRun(ProgramName program, Args args) => {
   'program': encodeProgramName(program),
   'args': encodeArgs(args),
 };
 
-(ProgramName, Args) decodeStart(Object? json, [String field = 'start']) {
+(ProgramName, Args) decodeProgramToRun(
+  Object? json, [
+  String field = 'programToRun',
+]) {
   final map = _object(json, field);
   return (
     decodeProgramName(map['program'], '$field.program'),
