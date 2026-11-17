@@ -1,6 +1,6 @@
 /// The shared vocabulary of actions: what reading, writing, starting a
-/// program and reaching the world take and give back, and the drivers
-/// that carry them out.
+/// program, reaching the world and calling the model take and give back,
+/// and the drivers that carry them out.
 ///
 /// Tools describe actions in these words, the airlock decides on them, and
 /// drivers carry them out. A driver is given only the action's program and
@@ -10,6 +10,7 @@ library;
 
 export 'src/drivers.dart';
 export 'src/file.dart';
+export 'src/model.dart';
 export 'src/outcome.dart';
 export 'src/program.dart';
 export 'src/relative_path.dart';

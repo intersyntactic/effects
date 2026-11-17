@@ -141,6 +141,28 @@ void main() {
     });
   });
 
+  group('Progress', () {
+    test('round-trips ReplyArriving', () {
+      final decoded = decodeProgress(
+        encodeProgress(const ReplyArriving('hi')),
+      ) as ReplyArriving;
+      expect(decoded.text, 'hi');
+    });
+
+    test('refuses an unknown kind, naming it', () {
+      expect(
+        () => decodeProgress({'kind': 'spoken', 'text': ''}),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('progress.kind'),
+          ),
+        ),
+      );
+    });
+  });
+
   group('ProgramMessage', () {
     test('a printed line is this JSON', () {
       expect(
@@ -242,6 +264,39 @@ void main() {
 
     test('refuses an invalid name', () {
       expect(() => decodeSignIn('Not Valid'), throwsFormatException);
+    });
+  });
+
+  group('ModelSignInName', () {
+    test('round-trips', () {
+      final signIn = ModelSignInName.parse('anthropic-api')!;
+      expect(decodeModelSignInName(encodeModelSignInName(signIn)), signIn);
+    });
+
+    test('refuses an invalid name', () {
+      expect(() => decodeModelSignInName('Not Valid'), throwsFormatException);
+    });
+  });
+
+  group('ModelName', () {
+    test('round-trips', () {
+      final model = ModelName.parse('claude-opus-5-5')!;
+      expect(decodeModelName(encodeModelName(model)), model);
+    });
+
+    test('refuses whitespace', () {
+      expect(() => decodeModelName('claude opus'), throwsFormatException);
+    });
+  });
+
+  group('ModelReply', () {
+    test('round-trips', () {
+      final reply = ModelReply('{"text": "hi"}');
+      expect(decodeModelReply(encodeModelReply(reply)).text, reply.text);
+    });
+
+    test('refuses a non-string', () {
+      expect(() => decodeModelReply(1), throwsFormatException);
     });
   });
 

@@ -1,6 +1,7 @@
 import 'package:is_path_confinement/is_path_confinement.dart' show isInsideTree;
 
 import 'file.dart';
+import 'model.dart';
 import 'outcome.dart';
 import 'program.dart';
 import 'relative_path.dart';
@@ -37,4 +38,24 @@ abstract interface class RunsPrograms implements CarriesOutActions {
 /// applies it, so the airlock decides a [Request] without ever seeing one.
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
   Future<Outcome<WebRequestOutcome>> carryOutWebRequest(Request request);
+}
+
+/// Calls the model. Holds every model sign-in: the model is outside the
+/// station, so the loop that proposes a call reaches it only through here,
+/// never directly. [systemPrompt] and [request] are each the exact bytes
+/// the airlock has approved, verbatim; [report] carries each
+/// [ReplyArriving] piece as it streams, never recorded, until the whole
+/// [ModelReply] is.
+///
+/// When [request] itself names a model, that name must be [model], or the
+/// driver refuses without calling: the airlock decided on [model], so the
+/// record must not show one thing decided and another called.
+abstract interface class AsksTheModel implements CarriesOutActions {
+  Future<Outcome<ModelReply>> askTheModel(
+    ModelSignInName signIn,
+    ModelName model,
+    String systemPrompt,
+    String request, {
+    required Report report,
+  });
 }

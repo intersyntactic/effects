@@ -26,18 +26,24 @@ the decision and what follows stay with `is_airlock_api`.
   refuses a credential) and an optional body — giving `WebRequestOutcome`
   (`status`, and either `created` or, for a non-2xx reply,
   `refusedBecause`).
+- Calling the model: a `ModelSignInName` by name (never the secret) and a
+  `ModelName` (a model id, such as `claude-opus-5-5`), with the exact
+  system prompt and request the airlock approved, giving `ModelReply` —
+  the model's final text, kept whole.
 - `Outcome<O>`: `Ran(output)`, or `Refused(why)`.
 - `Progress`: what a driver reports while it works, `Printed` for a
-  program's output.
+  program's output, `ReplyArriving` for a piece of the model's reply as
+  it streams — never recorded; only the whole `ModelReply` is.
 
-A trajectory's prompts are made by its own loop, which holds only the
-sign-ins its rules allow, not through an action here.
+A trajectory's prompts are made by its own loop, which holds no model
+sign-in and reaches the model only through `AsksTheModel`, never
+directly — the model is outside the station.
 
 ## Drivers
 
-`ReadsAndWritesFiles`, `RunsPrograms` (reporting progress as it goes) and
-`CarriesOutWebRequests`. A machine loads the drivers it can run: a phone's
-loads no `RunsPrograms`.
+`ReadsAndWritesFiles`, `RunsPrograms` (reporting progress as it goes),
+`CarriesOutWebRequests` and `AsksTheModel`. A machine loads the drivers
+it can run: a phone's loads no `RunsPrograms`.
 
 The library imports only `path` and `is_path_confinement` outside the SDK;
 a test reads every directive's URI from Dart's parse tree and holds it to
