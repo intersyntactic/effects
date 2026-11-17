@@ -18,6 +18,7 @@ final class RelativePath {
 
   static String _normalise(String raw) {
     final normal = p.posix.normalize(raw.startsWith('/') ? '.$raw' : raw);
+    // wire-ok: package:path's own sentinel for "normalised to the root"
     return normal == '.' ? '' : normal;
   }
 
@@ -29,10 +30,12 @@ final class RelativePath {
   /// further up again, not one level back down the chain.
   RelativePath get folder {
     if (value.isEmpty) return root;
+    // wire-ok: package:path's own text for "go up a level", not JSON data
     if (value.split('/').last == '..') {
       return RelativePath._(p.posix.normalize('$value/..'));
     }
     final dir = p.posix.dirname(value);
+    // wire-ok: package:path's own sentinel for "no parent left to name"
     return dir == '.' ? root : RelativePath._(dir);
   }
 

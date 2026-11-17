@@ -97,6 +97,7 @@ Object? encodeReadResult(ReadResult result) => switch (result) {
 
 ReadResult decodeReadResult(Object? json, [String field = 'readResult']) {
   final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX below
   return switch (map['kind']) {
     'text' => ReadText(_string(map['text'], '$field.text')),
     'missing' => const ReadMissing(),
@@ -136,6 +137,7 @@ ExecResult decodeExecResult(Object? json, [String field = 'execResult']) {
   final map = _object(json, field);
   final stdout = _string(map['stdout'], '$field.stdout');
   final stderr = _string(map['stderr'], '$field.stderr');
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
   return switch (map['kind']) {
     'exited' => Exited(
       _int(map['exitCode'], '$field.exitCode'),
@@ -180,7 +182,9 @@ Object? encodeProgress(Progress progress) => switch (progress) {
 
 Progress decodeProgress(Object? json, [String field = 'progress']) {
   final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
   return switch (map['kind']) {
+    // wire-ok: this is the wire; decodeX pairs with encodeX above
     'printed' => Printed(switch (map['channel']) {
       'stdout' => Channel.stdout,
       'stderr' => Channel.stderr,
@@ -210,6 +214,7 @@ ProgramMessage decodeProgramMessage(
   String field = 'programMessage',
 ]) {
   final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
   return switch (map['kind']) {
     'reported' => Reported(decodeProgress(map['progress'], '$field.progress')),
     'finished' => Finished(
@@ -359,6 +364,7 @@ Outcome<O> decodeOutcome<O>(
   String field = 'outcome',
 ]) {
   final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
   return switch (map['kind']) {
     'ran' => Ran(decodeOutput(map['output'], '$field.output')),
     'refused' => Refused(_string(map['why'], '$field.why')),
