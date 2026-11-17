@@ -4,7 +4,7 @@
 ///
 /// Tools describe effects in these words, the airlock decides on them, and
 /// drivers carry them out. A driver depends on this alone, so it sees no
-/// run, journey path or decision.
+/// effect record, journey path or decision.
 library;
 
 export 'src/drivers.dart';

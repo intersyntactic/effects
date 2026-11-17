@@ -1,4 +1,4 @@
-/// What became of a run.
+/// What became of an effect.
 sealed class Outcome<O> {
   const Outcome();
 }

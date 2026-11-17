@@ -1,10 +1,11 @@
 # is_effects
 
-The shared vocabulary of intersyntactic's effects: what a tool's run
+The shared vocabulary of intersyntactic's effects: what a tool's effect
 describes, the airlock decides on, and a driver carries out.
 
-A driver depends on this package alone, so it sees no run, journey path or
-decision: it is reached only once a run is decided, by `is_airlock_api`.
+A driver depends on this package alone, so it sees no effect record, journey
+path or decision: it is reached only once an effect is decided, by
+`is_airlock_api`.
 
 ## What an effect takes and gives back
 
