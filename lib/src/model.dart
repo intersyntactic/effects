@@ -46,9 +46,11 @@ final class ModelName {
   String toString() => value;
 }
 
-/// What the model sent back, whole, as it arrived: the response body's raw
-/// text, kept exactly as received. Recorded once, as an outcome; the
-/// pieces streamed beforehand are [ReplyArriving], never recorded.
+/// The model's final text, whole: not the transport it arrived in, nor
+/// the pieces streamed beforehand ([ReplyArriving], never recorded) —
+/// a driver whose wire is a stream of events gives the one marking the
+/// call as done (such as a `result` event's own text). Recorded once,
+/// as an outcome.
 final class ModelReply {
   const ModelReply(this.text);
 

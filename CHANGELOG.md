@@ -12,11 +12,17 @@
   "the model call goes through the airlock"). New, purely additive:
   `ModelSignInName` (a model sign-in by name, never the secret, built
   like `SignIn`), `ModelName` (a model id, a checked string), `ModelReply`
-  (the response body's raw text, kept whole, recorded once as an
-  outcome), and `AsksTheModel`, named for what it does: holds every model
-  sign-in, so `askTheModel(signIn, model, request, {required report})`
-  is the only way off this machine for a model call. `request` is the
-  exact body the airlock approved, byte for byte.
+  (the model's final text, kept whole, recorded once as an outcome), and
+  `AsksTheModel`, named for what it does: holds every model sign-in, so
+  `askTheModel(signIn, model, systemPrompt, request, {required report})`
+  is the only way off this machine for a model call. `systemPrompt` and
+  `request` are each the exact bytes the airlock approved, verbatim —
+  found during review (web-driver-0b, against a driver whose system
+  prompt is a separate CLI argument, not part of one request body) that
+  a single `request` string had nowhere for it. `AsksTheModel`'s doc is
+  now also a contract: when `request` itself names a model, it must be
+  `model`, or the driver refuses without calling, so the record can
+  never show one model decided and another called (airlock-api-04).
 
 ## 0.6.0
 

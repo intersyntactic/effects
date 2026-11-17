@@ -28,8 +28,8 @@ the decision and what follows stay with `is_airlock_api`.
   `refusedBecause`).
 - Calling the model: a `ModelSignInName` by name (never the secret) and a
   `ModelName` (a model id, such as `claude-opus-5-5`), with the exact
-  request body the airlock approved, giving `ModelReply` — the response
-  body's raw text, kept whole.
+  system prompt and request the airlock approved, giving `ModelReply` —
+  the model's final text, kept whole.
 - `Outcome<O>`: `Ran(output)`, or `Refused(why)`.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output, `ReplyArriving` for a piece of the model's reply as

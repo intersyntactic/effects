@@ -42,13 +42,19 @@ abstract interface class CarriesOutWebRequests implements CarriesOutActions {
 
 /// Calls the model. Holds every model sign-in: the model is outside the
 /// station, so the loop that proposes a call reaches it only through here,
-/// never directly. [request] is the exact body the airlock has approved,
-/// byte for byte; [report] carries each [ReplyArriving] piece as it streams,
-/// never recorded, until the whole [ModelReply] is.
+/// never directly. [systemPrompt] and [request] are each the exact bytes
+/// the airlock has approved, verbatim; [report] carries each
+/// [ReplyArriving] piece as it streams, never recorded, until the whole
+/// [ModelReply] is.
+///
+/// When [request] itself names a model, that name must be [model], or the
+/// driver refuses without calling: the airlock decided on [model], so the
+/// record must not show one thing decided and another called.
 abstract interface class AsksTheModel implements CarriesOutActions {
   Future<Outcome<ModelReply>> askTheModel(
     ModelSignInName signIn,
     ModelName model,
+    String systemPrompt,
     String request, {
     required Report report,
   });
