@@ -1,4 +1,4 @@
-/// What became of an effect.
+/// What became of an action.
 sealed class Outcome<O> {
   const Outcome();
 }

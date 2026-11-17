@@ -50,7 +50,7 @@ bool _allowed(String target) {
 }
 
 void main() {
-  test('the contract imports no runner, tool, client or effect', () {
+  test('the contract imports no runner, tool, client or action', () {
     final violations = <String>[];
     for (final file in Directory(
       'lib',
@@ -67,7 +67,7 @@ void main() {
     expect(
       violations,
       isEmpty,
-      reason: 'is_effects names effects and carries out none',
+      reason: 'is_effects names actions and carries out none',
     );
   });
 }

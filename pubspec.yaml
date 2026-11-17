@@ -1,7 +1,7 @@
 name: is_effects
 description: >-
-  The shared vocabulary of intersyntactic's effects: what reading, writing,
-  starting a program and sending out of the home take and give back, and the
+  The shared vocabulary of intersyntactic's actions: what reading, writing,
+  starting a program and reaching the world take and give back, and the
   drivers that carry them out.
 version: 0.2.3
 repository: https://github.com/intersyntactic/effects

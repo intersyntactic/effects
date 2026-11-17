@@ -39,7 +39,7 @@ final class Args {
   final RelativePath inFolder;
 }
 
-/// What a driver reports while an effect is underway, before its outcome.
+/// What a driver reports while an action is underway, before its outcome.
 sealed class Progress {
   const Progress();
 }
@@ -54,7 +54,7 @@ final class Printed extends Progress {
 
 enum Channel { stdout, stderr }
 
-/// Where a driver reports [Progress] for the effect it is carrying out.
+/// Where a driver reports [Progress] for the action it is carrying out.
 typedef Report = void Function(Progress progress);
 
 /// What a program did once it started: it [Exited], or it was [Killed].
@@ -83,8 +83,8 @@ final class Killed extends ExecResult {
   final String why;
 }
 
-/// What a program driver sends back about one effect it was asked to start:
-/// any number of [Reported] while the effect is underway, then one
+/// What a program driver sends back about one action it was asked to start:
+/// any number of [Reported] while the action is underway, then one
 /// [Finished].
 ///
 /// The driver's [Report] carries [Progress] and its return value carries the
@@ -93,14 +93,14 @@ sealed class ProgramMessage {
   const ProgramMessage();
 }
 
-/// The driver reported [progress] while the effect was underway.
+/// The driver reported [progress] while the action was underway.
 final class Reported extends ProgramMessage {
   const Reported(this.progress);
 
   final Progress progress;
 }
 
-/// The effect is over, with [outcome]; nothing follows it.
+/// The action is over, with [outcome]; nothing follows it.
 final class Finished extends ProgramMessage {
   const Finished(this.outcome);
 

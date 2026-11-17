@@ -1,13 +1,12 @@
 # is_effects
 
-The shared vocabulary of intersyntactic's effects: what a tool's effect
+The shared vocabulary of intersyntactic's actions: what a tool's action
 describes, the airlock decides on, and a driver carries out.
 
-A driver depends on this package alone, so it sees no effect record, journey
-path or decision: it is reached only once an effect is decided, by
-`is_airlock_api`.
+A driver is given only the action's program and input; the journey path,
+the decision and what follows stay with `is_airlock_api`.
 
-## What an effect takes and gives back
+## What an action takes and gives back
 
 - `RelativePath`: a path relative to a driver's root, normalised by its
   constructor. Whether it may leave that root — by its text, or by a
@@ -31,7 +30,7 @@ path or decision: it is reached only once an effect is decided, by
   program's output.
 
 A journey path's prompts are made by its own loop, which holds only the
-sign-ins its rules allow, not through an effect here.
+sign-ins its rules allow, not through an action here.
 
 ## Drivers
 
@@ -39,5 +38,6 @@ sign-ins its rules allow, not through an effect here.
 `WebDriver`. A machine loads the drivers it can run: a phone's loads no
 `ProgramDriver`.
 
-The library imports `path` and nothing else outside the SDK; a test reads
-every directive's URI from Dart's parse tree and holds it to that.
+The library imports only `path` and `is_path_confinement` outside the SDK;
+a test reads every directive's URI from Dart's parse tree and holds it to
+that.
