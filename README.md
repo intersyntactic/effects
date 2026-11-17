@@ -23,8 +23,9 @@ the decision and what follows stay with `is_airlock_api`.
   or `@`, so a path can never name somewhere other than where it was
   decided to go) and an optional `SignIn` by name, with a `Request` — the
   web driver's input: method, path, headers (`validatedHeaders`, which
-  refuses a credential) and an optional body — giving `Sent` (`status`,
-  and either `created` or, for a non-2xx reply, `refusedBecause`).
+  refuses a credential) and an optional body — giving `WebRequestOutcome`
+  (`status`, and either `created` or, for a non-2xx reply,
+  `refusedBecause`).
 - `Outcome<O>`: `Ran(output)`, or `Refused(why)`.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output.

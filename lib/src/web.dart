@@ -141,7 +141,7 @@ final class Request {
   final SignIn? signIn;
   final Map<String, String> headers;
 
-  /// What reaches the destination alone. [Sent] keeps no copy
+  /// What reaches the destination alone. [WebRequestOutcome] keeps no copy
   /// of it: what a reader needs back — the model's output, the person's
   /// words — is already elsewhere in the record.
   final String? body;
@@ -151,11 +151,15 @@ final class Request {
 /// destination made of it, when it made one) or [refusedBecause] (why,
 /// when [status] was not 2xx).
 ///
-/// Carries no body: naming what was sent, where it went and what came
-/// back is enough, since what it carried is already elsewhere in the
-/// record.
-final class Sent {
-  const Sent({required this.status, this.created, this.refusedBecause});
+/// Carries no body: naming the web request made, where it went and what
+/// came back is enough, since what it carried is already elsewhere in
+/// the record.
+final class WebRequestOutcome {
+  const WebRequestOutcome({
+    required this.status,
+    this.created,
+    this.refusedBecause,
+  });
 
   final int status;
   final String? created;

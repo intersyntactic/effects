@@ -32,8 +32,8 @@ abstract interface class ProgramDriver implements Driver {
   });
 }
 
-/// Reaches the world: sends requests. Holds each sign-in's secret and applies
-/// it, so the airlock decides a [Request] without ever seeing one.
+/// Reaches the world: carries out requests. Holds each sign-in's secret and
+/// applies it, so the airlock decides a [Request] without ever seeing one.
 abstract interface class WebDriver implements Driver {
-  Future<Outcome<Sent>> send(Request request);
+  Future<Outcome<WebRequestOutcome>> carryOutWebRequest(Request request);
 }

@@ -315,17 +315,20 @@ Request decodeRequest(Object? json, [String field = 'request']) {
   );
 }
 
-// Sent
+// WebRequestOutcome
 
-Object? encodeSent(Sent sent) => {
-  'status': sent.status,
-  'created': sent.created,
-  'refusedBecause': sent.refusedBecause,
+Object? encodeWebRequestOutcome(WebRequestOutcome outcome) => {
+  'status': outcome.status,
+  'created': outcome.created,
+  'refusedBecause': outcome.refusedBecause,
 };
 
-Sent decodeSent(Object? json, [String field = 'sent']) {
+WebRequestOutcome decodeWebRequestOutcome(
+  Object? json, [
+  String field = 'webRequestOutcome',
+]) {
   final map = _object(json, field);
-  return Sent(
+  return WebRequestOutcome(
     status: _int(map['status'], '$field.status'),
     created: switch (map['created']) {
       null => null,

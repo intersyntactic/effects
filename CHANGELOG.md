@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- **Breaking:** `WebDriver.send` is now `carryOutWebRequest`; `Sent` is
+  now `WebRequestOutcome`. Nick ruled out tiny words for complex things
+  on 16 Nov (`send` and `renderer` named as examples): "longer names are
+  ok". No deprecated alias kept, so the old word doesn't survive through
+  the types every session reads.
+
 ## 0.2.3
 
 - Depends on `is_path_confinement` so `FileDriver`'s doc comment can point

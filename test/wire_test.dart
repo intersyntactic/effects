@@ -308,18 +308,21 @@ void main() {
     });
   });
 
-  group('Sent', () {
+  group('WebRequestOutcome', () {
     test('round-trips a success', () {
-      final sent = const Sent(status: 201, created: 'abc123');
-      final decoded = decodeSent(encodeSent(sent));
+      final outcome = const WebRequestOutcome(status: 201, created: 'abc123');
+      final decoded = decodeWebRequestOutcome(encodeWebRequestOutcome(outcome));
       expect(decoded.status, 201);
       expect(decoded.created, 'abc123');
       expect(decoded.refusedBecause, isNull);
     });
 
     test('round-trips a failure', () {
-      final sent = const Sent(status: 400, refusedBecause: 'bad request');
-      final decoded = decodeSent(encodeSent(sent));
+      final outcome = const WebRequestOutcome(
+        status: 400,
+        refusedBecause: 'bad request',
+      );
+      final decoded = decodeWebRequestOutcome(encodeWebRequestOutcome(outcome));
       expect(decoded.status, 400);
       expect(decoded.created, isNull);
       expect(decoded.refusedBecause, 'bad request');
