@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- **Breaking:** `StartsPrograms` is now `RunsPrograms`; its `start` is now
+  `runProgram`. Nick's ruling: `start` named one of five steps (feed
+  stdin, stream through `report`, enforce the time limit, return only on
+  exit or kill); `run` covers all of it. `CarriesOutActions` and
+  `ReadsAndWritesFiles` from 0.4.0 stand as they are. No deprecated alias
+  kept.
+
 ## 0.4.0
 
 - **Breaking:** the four driver interfaces are named for what they can

@@ -7,7 +7,7 @@ import 'relative_path.dart';
 import 'web.dart';
 
 /// Operates one part of the world. A machine loads the drivers it can run: a
-/// phone's loads no [StartsPrograms].
+/// phone's loads no [RunsPrograms].
 ///
 /// A driver knows the action it carries out and nothing of who decided it:
 /// it is reached only once that is decided.
@@ -22,10 +22,11 @@ abstract interface class ReadsAndWritesFiles implements CarriesOutActions {
   Future<Outcome<Wrote>> write(FileText file);
 }
 
-/// Starts programs as processes, reporting what they print as they print
-/// it. How long one may run, and when it is killed, is the driver's.
-abstract interface class StartsPrograms implements CarriesOutActions {
-  Future<Outcome<ExecResult>> start(
+/// Runs a program as a process from start to exit (or kill), reporting what
+/// it prints as it prints it. How long it may run, and when it is killed,
+/// is the driver's.
+abstract interface class RunsPrograms implements CarriesOutActions {
+  Future<Outcome<ExecResult>> runProgram(
     ProgramName program,
     Args args, {
     required Report report,

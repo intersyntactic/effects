@@ -155,7 +155,7 @@ ExecResult decodeExecResult(Object? json, [String field = 'execResult']) {
   };
 }
 
-// Start: what StartsPrograms.start is given
+// Start: what RunsPrograms.runProgram is given
 
 Object? encodeStart(ProgramName program, Args args) => {
   'program': encodeProgramName(program),
