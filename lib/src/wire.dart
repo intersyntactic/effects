@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'file.dart';
 import 'model.dart';
 import 'outcome.dart';
@@ -17,6 +20,16 @@ String _string(Object? json, String field) => switch (json) {
   final String s => s,
   _ => throw FormatException('$field: not a string'),
 };
+
+/// [json] as base64-decoded bytes, or a [FormatException] naming [field].
+Uint8List _base64(Object? json, String field) {
+  final raw = _string(json, field);
+  try {
+    return base64Decode(raw);
+  } on FormatException {
+    throw FormatException('$field: not base64');
+  }
+}
 
 /// [json] as an [int], or a [FormatException] naming [field].
 int _int(Object? json, String field) => switch (json) {
@@ -104,6 +117,28 @@ ReadResult decodeReadResult(Object? json, [String field = 'readResult']) {
     'missing' => const ReadMissing(),
     final other => throw FormatException(
       '$field.kind: not "text" or "missing" ($other)',
+    ),
+  };
+}
+
+// BytesReadResult
+
+Object? encodeBytesReadResult(BytesReadResult result) => switch (result) {
+  ReadBytes(:final bytes) => {'kind': 'bytes', 'base64': base64Encode(bytes)},
+  ReadMissing() => {'kind': 'missing'},
+};
+
+BytesReadResult decodeBytesReadResult(
+  Object? json, [
+  String field = 'bytesReadResult',
+]) {
+  final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
+  return switch (map['kind']) {
+    'bytes' => ReadBytes(_base64(map['base64'], '$field.base64')),
+    'missing' => const ReadMissing(),
+    final other => throw FormatException(
+      '$field.kind: not "bytes" or "missing" ($other)',
     ),
   };
 }

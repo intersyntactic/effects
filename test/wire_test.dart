@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:is_effects/is_effects.dart';
 import 'package:test/test.dart';
@@ -89,6 +90,39 @@ void main() {
 
     test('refuses an unknown kind', () {
       expect(() => decodeReadResult({'kind': 'huh'}), throwsFormatException);
+    });
+  });
+
+  group('BytesReadResult', () {
+    test('round-trips ReadBytes, including bytes that are not UTF-8', () {
+      final bytes = Uint8List.fromList([0x50, 0x4b, 0x03, 0x04, 0xff, 0x00]);
+      expect(
+        (decodeBytesReadResult(
+          encodeBytesReadResult(ReadBytes(bytes)),
+        ) as ReadBytes).bytes,
+        bytes,
+      );
+    });
+
+    test('round-trips ReadMissing', () {
+      expect(
+        decodeBytesReadResult(encodeBytesReadResult(const ReadMissing())),
+        isA<ReadMissing>(),
+      );
+    });
+
+    test('refuses bytes that are not base64', () {
+      expect(
+        () => decodeBytesReadResult({'kind': 'bytes', 'base64': '!!'}),
+        throwsFormatException,
+      );
+    });
+
+    test('refuses a text result', () {
+      expect(
+        () => decodeBytesReadResult({'kind': 'text', 'text': 'hi'}),
+        throwsFormatException,
+      );
     });
   });
 
