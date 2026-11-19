@@ -23,13 +23,17 @@ the decision and what follows stay with `is_airlock_api`.
   or `@`, so a path can never name somewhere other than where it was
   decided to go) and an optional `SignIn` by name, with a `Request` — the
   web driver's input: method, path, headers (`validatedHeaders`, which
-  refuses a credential) and an optional body — giving `WebRequestOutcome`
+  refuses a credential) and an optional body — giving a `WebResponse`
   (`status`, and either `created` or, for a non-2xx reply,
   `refusedBecause`).
 - Calling the model: a `ModelSignInName` by name (never the secret) and a
   `ModelName` (a model id, such as `claude-opus-5-5`), with the exact
-  system prompt and request the airlock approved, giving `ModelReply` —
-  the model's final text, kept whole.
+  system prompt and request the airlock approved, giving a `ModelReply`:
+  `FinishedReply` (the model's whole text) or `CutOffReply` (the call ran
+  and spent tokens, but the reply ended before the model was done) —
+  a closed set, so a caller can't treat a cut-off answer as the model's
+  full word just because it forgot to check. Both carry `usage` (a
+  `ModelUsage`, null when the driver can't report one).
 - `Outcome<O>`: `Ran(output)`, or `Refused(why)`.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output, `ReplyArriving` for a piece of the model's reply as

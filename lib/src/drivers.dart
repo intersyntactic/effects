@@ -37,7 +37,7 @@ abstract interface class RunsPrograms implements CarriesOutActions {
 /// Reaches the world: carries out requests. Holds each sign-in's secret and
 /// applies it, so the airlock decides a [Request] without ever seeing one.
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
-  Future<Outcome<WebRequestOutcome>> carryOutWebRequest(Request request);
+  Future<Outcome<WebResponse>> carryOutWebRequest(Request request);
 }
 
 /// Calls the model. Holds every model sign-in: the model is outside the

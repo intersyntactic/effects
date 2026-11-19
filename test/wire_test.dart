@@ -270,7 +270,7 @@ void main() {
     test('round-trips Finished with a model reply', () {
       final decoded = decodeProgramMessage(
         encodeProgramMessage(
-          Finished<ModelReply>(Ran(const ModelReply('hi'))),
+          Finished<ModelReply>(Ran(const FinishedReply(text: 'hi'))),
           encodeModelReply,
         ),
         decodeModelReply,
@@ -427,14 +427,118 @@ void main() {
     });
   });
 
-  group('ModelReply', () {
-    test('round-trips', () {
-      final reply = ModelReply('{"text": "hi"}');
-      expect(decodeModelReply(encodeModelReply(reply)).text, reply.text);
+  group('ModelUsage', () {
+    test('context is input + cacheRead + cacheCreation, never output', () {
+      const usage = ModelUsage(
+        input: 100,
+        cacheRead: 20,
+        output: 500,
+        cacheCreation: 7,
+      );
+      expect(usage.context, 127);
     });
 
-    test('refuses a non-string', () {
+    test('context treats a null cacheCreation as none spent', () {
+      const usage = ModelUsage(input: 100, cacheRead: 20, output: 500);
+      expect(usage.context, 120);
+    });
+
+    test('round-trips, with cacheCreation and contextWindow null', () {
+      const usage = ModelUsage(input: 10, cacheRead: 2, output: 30);
+      final decoded = decodeModelUsage(encodeModelUsage(usage));
+      expect(decoded, usage);
+      expect(decoded.cacheCreation, isNull);
+      expect(decoded.contextWindow, isNull);
+    });
+
+    test('round-trips, every field present', () {
+      const usage = ModelUsage(
+        input: 10,
+        cacheRead: 2,
+        output: 30,
+        cacheCreation: 4,
+        contextWindow: 1000000,
+      );
+      expect(decodeModelUsage(encodeModelUsage(usage)), usage);
+    });
+  });
+
+  group('ModelReply', () {
+    test('a finished reply with no usage is still the bare string', () {
+      expect(encodeModelReply(const FinishedReply(text: 'hi')), 'hi');
+    });
+
+    test('round-trips a bare string as a FinishedReply', () {
+      final reply = FinishedReply(text: '{"text": "hi"}');
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<FinishedReply>());
+      expect(decoded.text, reply.text);
+    });
+
+    test('decodes a reply recorded before usage or incomplete existed', () {
+      final decoded = decodeModelReply('hi');
+      expect(decoded, isA<FinishedReply>());
+      expect(decoded.text, 'hi');
+      expect(decoded.usage, isNull);
+    });
+
+    test('refuses a non-string, non-object', () {
       expect(() => decodeModelReply(1), throwsFormatException);
+    });
+
+    test('round-trips a FinishedReply with usage', () {
+      const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
+      final reply = const FinishedReply(text: 'hi', usage: usage);
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<FinishedReply>());
+      expect(decoded.text, 'hi');
+      expect(decoded.usage, usage);
+    });
+
+    test('round-trips a CutOffReply', () {
+      final reply = const CutOffReply(text: 'cut off mid');
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<CutOffReply>());
+      expect(decoded.text, 'cut off mid');
+    });
+
+    test('round-trips a CutOffReply with usage', () {
+      const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
+      final reply = const CutOffReply(text: 'cut off mid', usage: usage);
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<CutOffReply>());
+      expect(decoded.text, 'cut off mid');
+      expect(decoded.usage, usage);
+    });
+
+    test('encodes a FinishedReply with usage, keyed, not as a bare string', () {
+      const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
+      expect(encodeModelReply(const FinishedReply(text: 'hi', usage: usage)), {
+        'text': 'hi',
+        'usage': {
+          'input': 10,
+          'cacheRead': 0,
+          'output': 5,
+          'cacheCreation': null,
+          'contextWindow': null,
+        },
+      });
+    });
+
+    test('encodes a CutOffReply with incomplete, even with no usage', () {
+      expect(encodeModelReply(const CutOffReply(text: 'cut off mid')), {
+        'text': 'cut off mid',
+        'incomplete': true,
+      });
+    });
+
+    test('a switch over ModelReply must handle both cases', () {
+      String describe(ModelReply reply) => switch (reply) {
+        FinishedReply() => 'finished',
+        CutOffReply() => 'cut off',
+      };
+      expect(describe(const FinishedReply(text: 'hi')), 'finished');
+      expect(describe(const CutOffReply(text: 'hi')), 'cut off');
     });
   });
 
@@ -501,21 +605,21 @@ void main() {
     });
   });
 
-  group('WebRequestOutcome', () {
+  group('WebResponse', () {
     test('round-trips a success', () {
-      final outcome = const WebRequestOutcome(status: 201, created: 'abc123');
-      final decoded = decodeWebRequestOutcome(encodeWebRequestOutcome(outcome));
+      final response = const WebResponse(status: 201, created: 'abc123');
+      final decoded = decodeWebResponse(encodeWebResponse(response));
       expect(decoded.status, 201);
       expect(decoded.created, 'abc123');
       expect(decoded.refusedBecause, isNull);
     });
 
     test('round-trips a failure', () {
-      final outcome = const WebRequestOutcome(
+      final response = const WebResponse(
         status: 400,
         refusedBecause: 'bad request',
       );
-      final decoded = decodeWebRequestOutcome(encodeWebRequestOutcome(outcome));
+      final decoded = decodeWebResponse(encodeWebResponse(response));
       expect(decoded.status, 400);
       expect(decoded.created, isNull);
       expect(decoded.refusedBecause, 'bad request');

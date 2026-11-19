@@ -302,12 +302,66 @@ ModelName decodeModelName(Object? json, [String field = 'model']) {
       (throw FormatException('$field: not a model name ($raw)'));
 }
 
+// ModelUsage
+
+Object? encodeModelUsage(ModelUsage usage) => {
+  'input': usage.input,
+  'cacheRead': usage.cacheRead,
+  'output': usage.output,
+  'cacheCreation': usage.cacheCreation,
+  'contextWindow': usage.contextWindow,
+};
+
+ModelUsage decodeModelUsage(Object? json, [String field = 'modelUsage']) {
+  final map = _object(json, field);
+  return ModelUsage(
+    input: _int(map['input'], '$field.input'),
+    cacheRead: _int(map['cacheRead'], '$field.cacheRead'),
+    output: _int(map['output'], '$field.output'),
+    cacheCreation: switch (map['cacheCreation']) {
+      null => null,
+      final int n => n,
+      _ => throw FormatException('$field.cacheCreation: not an int'),
+    },
+    contextWindow: switch (map['contextWindow']) {
+      null => null,
+      final int n => n,
+      _ => throw FormatException('$field.contextWindow: not an int'),
+    },
+  );
+}
+
 // ModelReply
 
-Object? encodeModelReply(ModelReply reply) => reply.text;
+Object? encodeModelReply(ModelReply reply) {
+  // A finished reply with no usage: the bare string every reply encoded
+  // as before 0.9.0, unchanged.
+  if (reply is FinishedReply && reply.usage == null) return reply.text;
+  return {
+    'text': reply.text,
+    if (reply.usage != null) 'usage': encodeModelUsage(reply.usage!),
+    if (reply is CutOffReply) 'incomplete': true,
+  };
+}
 
-ModelReply decodeModelReply(Object? json, [String field = 'modelReply']) =>
-    ModelReply(_string(json, field));
+ModelReply decodeModelReply(Object? json, [String field = 'modelReply']) {
+  // A reply recorded before 0.9.0, or any driver that has no usage to
+  // add: just the text, exactly as decodeModelReply always read it — and
+  // always finished, since a driver with no usage has no way to say
+  // "incomplete" either.
+  if (json case final String text) return FinishedReply(text: text);
+  final map = _object(json, field);
+  final text = _string(map['text'], '$field.text');
+  final usage = map['usage'] == null
+      ? null
+      : decodeModelUsage(map['usage'], '$field.usage');
+  final cutOff = map.containsKey('incomplete')
+      ? _bool(map['incomplete'], '$field.incomplete')
+      : false;
+  return cutOff
+      ? CutOffReply(text: text, usage: usage)
+      : FinishedReply(text: text, usage: usage);
+}
 
 // ModelCall: the {signIn, model, systemPrompt, request} envelope sent over
 // the socket to an AsksTheModel service, so a caller and the service can't
@@ -391,20 +445,17 @@ Request decodeRequest(Object? json, [String field = 'request']) {
   );
 }
 
-// WebRequestOutcome
+// WebResponse
 
-Object? encodeWebRequestOutcome(WebRequestOutcome outcome) => {
-  'status': outcome.status,
-  'created': outcome.created,
-  'refusedBecause': outcome.refusedBecause,
+Object? encodeWebResponse(WebResponse response) => {
+  'status': response.status,
+  'created': response.created,
+  'refusedBecause': response.refusedBecause,
 };
 
-WebRequestOutcome decodeWebRequestOutcome(
-  Object? json, [
-  String field = 'webRequestOutcome',
-]) {
+WebResponse decodeWebResponse(Object? json, [String field = 'webResponse']) {
   final map = _object(json, field);
-  return WebRequestOutcome(
+  return WebResponse(
     status: _int(map['status'], '$field.status'),
     created: switch (map['created']) {
       null => null,
