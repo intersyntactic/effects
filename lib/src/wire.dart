@@ -337,6 +337,24 @@ ModelName decodeModelName(Object? json, [String field = 'model']) {
       (throw FormatException('$field: not a model name ($raw)'));
 }
 
+// ModelAndSignIn
+
+Object? encodeModelAndSignIn(ModelAndSignIn pair) => {
+  'signIn': encodeModelSignInName(pair.signIn),
+  'model': encodeModelName(pair.model),
+};
+
+ModelAndSignIn decodeModelAndSignIn(
+  Object? json, [
+  String field = 'modelAndSignIn',
+]) {
+  final map = _object(json, field);
+  return ModelAndSignIn(
+    signIn: decodeModelSignInName(map['signIn'], '$field.signIn'),
+    model: decodeModelName(map['model'], '$field.model'),
+  );
+}
+
 // ModelUsage
 
 Object? encodeModelUsage(ModelUsage usage) => {

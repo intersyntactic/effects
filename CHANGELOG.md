@@ -20,6 +20,9 @@
 - The wire is additive: `keep`, `body` and `redirects` are written
   only when set, so every existing record decodes as before. Bytes go
   as base64.
+- `ModelAndSignIn`: a `ModelName` and the `ModelSignInName` it is called
+  under, such as a starting model. Wire: `{"signIn": ..., "model": ...}`
+  via `encodeModelAndSignIn`/`decodeModelAndSignIn`.
 
 ## 0.10.0
 
