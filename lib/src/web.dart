@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'outcome.dart';
 
 /// An http(s) site a [Request] may be sent to: scheme, host and port only,
@@ -122,6 +124,10 @@ const _credentialHeaders = {
   'x-api-key',
 };
 
+/// What of a 2xx response's body a [Request] asks to keep. Every byte kept
+/// is recorded, so the airlock decides on this with the rest of the request.
+enum BodyToKeep { none, text, bytes }
+
 /// Something a [CarriesOutWebRequests] carries out to [origin], reaching
 /// the world.
 ///
@@ -136,6 +142,7 @@ final class Request {
     this.signIn,
     Map<String, String> headers = const {},
     this.body,
+    this.keep = BodyToKeep.none,
   }) : headers = validatedHeaders(headers);
 
   final Origin origin;
@@ -144,22 +151,98 @@ final class Request {
   final SignIn? signIn;
   final Map<String, String> headers;
 
-  /// What reaches the destination alone. [WebResponse] keeps no copy
-  /// of it: what a reader needs back — the model's output, the person's
-  /// words — is already elsewhere in the record.
+  /// What reaches the destination. [WebResponse] keeps no copy of it,
+  /// since the request itself is already in the record.
   final String? body;
+
+  /// What of the response's body comes back in [WebResponse.body].
+  final BodyToKeep keep;
+}
+
+/// A response's body, as its [Request.keep] asked.
+sealed class ResponseBody {
+  const ResponseBody();
+}
+
+/// Nothing kept: [BodyToKeep.none] was asked, or [WebResponse.status] was
+/// not 2xx.
+final class NoBody extends ResponseBody {
+  const NoBody();
+}
+
+/// The body decoded as UTF-8, for [BodyToKeep.text].
+final class TextBody extends ResponseBody {
+  const TextBody(this.text);
+
+  final String text;
+}
+
+/// The body's exact bytes, such as a .docx's zip, for [BodyToKeep.bytes].
+final class BytesBody extends ResponseBody {
+  const BytesBody(this.bytes);
+
+  final Uint8List bytes;
+}
+
+/// Where a followed redirect ended up: an http(s) address with no query,
+/// fragment or credentials, since a pre-authenticated download address
+/// carries its token in the query and the record must never hold it.
+final class RedirectedTo {
+  const RedirectedTo._(this.value);
+
+  /// [address] with its query, fragment and credentials dropped, or null
+  /// when it is not an http(s) address.
+  static RedirectedTo? of(Uri address) {
+    final site = Uri(
+      scheme: address.scheme,
+      host: address.host,
+      port: address.port,
+    );
+    if (Origin.parse(site.toString()) == null) return null;
+    return RedirectedTo._(site.replace(path: address.path));
+  }
+
+  /// [raw] as a recorded redirect, or null unless it is already an http(s)
+  /// address with no query, fragment or credentials.
+  static RedirectedTo? parse(String raw) {
+    final uri = Uri.tryParse(raw);
+    if (uri == null ||
+        uri.hasQuery ||
+        uri.hasFragment ||
+        uri.userInfo.isNotEmpty) {
+      return null;
+    }
+    return of(uri);
+  }
+
+  final Uri value;
+
+  @override
+  bool operator ==(Object other) =>
+      other is RedirectedTo && other.value == value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => value.toString();
 }
 
 /// The site's response to a [Request]: [status], and either [created] (the
 /// id the destination made of it, when it made one) or [refusedBecause]
 /// (why, in the site's own words, when [status] was not 2xx).
 ///
-/// Carries no body: naming the web request made, where it went and what
-/// came back is enough, since what it carried is already elsewhere in
-/// the record. A refused sign-in, where nothing was sent, is [Refused],
-/// not this.
+/// [body] is what [Request.keep] asked for, only for a 2xx [status].
+/// [redirects] are the hops the driver followed to reach the response. A
+/// refused sign-in, where nothing was sent, is [Refused], not this.
 final class WebResponse {
-  const WebResponse({required this.status, this.created, this.refusedBecause});
+  const WebResponse({
+    required this.status,
+    this.created,
+    this.refusedBecause,
+    this.body = const NoBody(),
+    this.redirects = const [],
+  });
 
   final int status;
   final String? created;
@@ -168,4 +251,10 @@ final class WebResponse {
   /// so a reader can say why without reaching into a log only the
   /// driver's host can see.
   final String? refusedBecause;
+
+  final ResponseBody body;
+
+  /// Each address a followed redirect led to, in order, the last being
+  /// where [status] and [body] came from. Empty when none was followed.
+  final List<RedirectedTo> redirects;
 }

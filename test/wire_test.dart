@@ -620,6 +620,20 @@ void main() {
       expect(decoded.signIn, request.signIn);
       expect(decoded.headers, request.headers);
       expect(decoded.body, request.body);
+      expect(decoded.keep, BodyToKeep.none);
+    });
+
+    test('round-trips what to keep of the body', () {
+      for (final keep in BodyToKeep.values) {
+        final decoded = decodeRequest(
+          encodeRequest(Request(origin, keep: keep)),
+        );
+        expect(decoded.keep, keep);
+      }
+    });
+
+    test('writes no keep when it keeps nothing, as before', () {
+      expect(encodeRequest(Request(origin)), isNot(contains('keep')));
     });
 
     test('refuses a credential header, naming the field', () {
@@ -657,6 +671,79 @@ void main() {
       expect(decoded.status, 400);
       expect(decoded.created, isNull);
       expect(decoded.refusedBecause, 'bad request');
+    });
+
+    test('writes no body or redirect when it has none, as before', () {
+      expect(encodeWebResponse(const WebResponse(status: 200)), {
+        'status': 200,
+        'created': null,
+        'refusedBecause': null,
+      });
+      expect(decodeWebResponse({'status': 200}).body, isA<NoBody>());
+    });
+
+    test('round-trips a text body', () {
+      final decoded = decodeWebResponse(
+        encodeWebResponse(
+          const WebResponse(status: 200, body: TextBody('{"value":[]}')),
+        ),
+      );
+      expect((decoded.body as TextBody).text, '{"value":[]}');
+    });
+
+    test('round-trips a bytes body that is not UTF-8', () {
+      final bytes = Uint8List.fromList([0x50, 0x4b, 0x03, 0x04, 0xff, 0x00]);
+      final decoded = decodeWebResponse(
+        encodeWebResponse(WebResponse(status: 200, body: BytesBody(bytes))),
+      );
+      expect((decoded.body as BytesBody).bytes, bytes);
+    });
+
+    test('round-trips every followed redirect, in order', () {
+      final hops = [
+        RedirectedTo.of(Uri.parse('https://tenant.sharepoint.com/download'))!,
+        RedirectedTo.of(Uri.parse('https://cdn.example.net/blob'))!,
+      ];
+      final decoded = decodeWebResponse(
+        encodeWebResponse(WebResponse(status: 200, redirects: hops)),
+      );
+      expect(decoded.redirects, hops);
+    });
+
+    test('reads no redirects as none', () {
+      expect(decodeWebResponse({'status': 200}).redirects, isEmpty);
+    });
+
+    test('refuses a recorded redirect that carries a query, naming it', () {
+      expect(
+        () => decodeWebResponse({
+          'status': 200,
+          'redirects': [
+            'https://tenant.sharepoint.com/download',
+            'https://cdn.example.net/blob?tempauth=secret',
+          ],
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('webResponse.redirects[1]'),
+          ),
+        ),
+      );
+    });
+  });
+
+  group('RedirectedTo', () {
+    test('drops the query, fragment and credentials', () {
+      final to = RedirectedTo.of(
+        Uri.parse('https://u:p@tenant.sharepoint.com/d.aspx?tempauth=x#f'),
+      )!;
+      expect(to.toString(), 'https://tenant.sharepoint.com/d.aspx');
+    });
+
+    test('is null for an address that is not http(s)', () {
+      expect(RedirectedTo.of(Uri.parse('ftp://example.com/f')), isNull);
     });
   });
 

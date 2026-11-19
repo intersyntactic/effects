@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.11.0
+
+- `WebResponse` can carry a body. `Request.keep` (`BodyToKeep`: `none`,
+  `text`, `bytes`; default `none`) says what of a 2xx response's body
+  comes back, so the airlock decides on that along with the rest of the
+  request. `WebResponse.body` is a `ResponseBody`: `NoBody`,
+  `TextBody(String)` or `BytesBody(Uint8List)`.
+- `CarriesOutWebRequests` documents the driver's rules: it caps the
+  body's size and `Refused` anything over the cap; a text body that
+  isn't UTF-8 is `Refused`; it never sends a sign-in's secret to another
+  origin.
+- `WebResponse.redirects`: a `List<RedirectedTo>`, every hop the driver
+  followed, in order; empty when it followed none. Each `RedirectedTo`
+  holds an http(s) address with its query, fragment and credentials
+  dropped, so the token in a pre-authenticated download address never
+  reaches the record. `RedirectedTo.of` drops
+  those parts; `parse` refuses a recorded address that has any of them.
+- The wire is additive: `keep`, `body` and `redirects` are written
+  only when set, so every existing record decodes as before. Bytes go
+  as base64.
+
 ## 0.10.0
 
 - **Breaking:** `ReadsAndWritesFiles` gains `readBytes(path)`, returning
