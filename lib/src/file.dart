@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'relative_path.dart';
 
 /// [text] for the file at [path]. The driver decides whether it may be
@@ -9,7 +11,7 @@ final class FileText {
   final String text;
 }
 
-/// What a read found.
+/// What a text read found.
 sealed class ReadResult {
   const ReadResult();
 }
@@ -20,8 +22,20 @@ final class ReadText extends ReadResult {
   final String text;
 }
 
-/// No file at the path.
-final class ReadMissing extends ReadResult {
+/// What a bytes read found.
+sealed class BytesReadResult {
+  const BytesReadResult();
+}
+
+/// The file's exact bytes, such as a .docx's zip.
+final class ReadBytes extends BytesReadResult {
+  const ReadBytes(this.bytes);
+
+  final Uint8List bytes;
+}
+
+/// No file at the path; what either kind of read can find.
+final class ReadMissing implements ReadResult, BytesReadResult {
   const ReadMissing();
 }
 

@@ -18,8 +18,14 @@ abstract interface class CarriesOutActions {}
 /// root — by its text, or by a symlink only the disk can show — is the
 /// operator's choice; this driver is where that choice is enforced, with
 /// [isInsideTree].
+///
+/// The caller chooses text or bytes, so the airlock decides on exactly what
+/// will come back. A file [read] as text that isn't UTF-8 is [Refused], never
+/// decoded loosely. How large a file [readBytes] returns is the driver's to
+/// decide: one over that is [Refused], since every byte returned is recorded.
 abstract interface class ReadsAndWritesFiles implements CarriesOutActions {
   Future<Outcome<ReadResult>> read(RelativePath path);
+  Future<Outcome<BytesReadResult>> readBytes(RelativePath path);
   Future<Outcome<Wrote>> write(FileText file);
 }
 

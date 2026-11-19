@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.0
+
+- **Breaking:** `ReadsAndWritesFiles` gains `readBytes(path)`, returning
+  `Outcome<BytesReadResult>`: `ReadBytes(Uint8List)` or `ReadMissing`.
+  Every implementer must add it. The caller chooses text or bytes, so a
+  text reader never has to handle bytes, and a bytes reader never has to
+  handle text. `ReadMissing` is a case of both results.
+- `read` documents what it does with a file that isn't UTF-8: `Refused`,
+  never decoded loosely. `readBytes` documents its size cap: the driver
+  sets it, and a file over the cap is `Refused`.
+- `encodeBytesReadResult`/`decodeBytesReadResult`: bytes go on the wire
+  as base64 under `{'kind': 'bytes', 'base64': ...}`.
+
 ## 0.9.0
 
 - **Breaking:** `WebRequestOutcome` is now `WebResponse`: it holds the
