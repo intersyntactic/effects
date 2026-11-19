@@ -50,8 +50,8 @@ abstract interface class RunsPrograms implements CarriesOutActions {
 /// kept is recorded.
 ///
 /// Which redirects it follows is the driver's, and it never sends a
-/// sign-in's secret across to another origin; one it followed is named in
-/// [WebResponse.redirectedTo].
+/// sign-in's secret across to another origin; every hop it followed is
+/// named, in order, in [WebResponse.redirects].
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
   Future<Outcome<WebResponse>> carryOutWebRequest(Request request);
 }

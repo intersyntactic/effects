@@ -699,23 +699,37 @@ void main() {
       expect((decoded.body as BytesBody).bytes, bytes);
     });
 
-    test('round-trips a followed redirect', () {
-      final to = RedirectedTo.of(
-        Uri.parse('https://tenant.sharepoint.com/_layouts/15/download.aspx'),
-      )!;
+    test('round-trips every followed redirect, in order', () {
+      final hops = [
+        RedirectedTo.of(Uri.parse('https://tenant.sharepoint.com/download'))!,
+        RedirectedTo.of(Uri.parse('https://cdn.example.net/blob'))!,
+      ];
       final decoded = decodeWebResponse(
-        encodeWebResponse(WebResponse(status: 200, redirectedTo: to)),
+        encodeWebResponse(WebResponse(status: 200, redirects: hops)),
       );
-      expect(decoded.redirectedTo, to);
+      expect(decoded.redirects, hops);
     });
 
-    test('refuses a recorded redirect that carries a query', () {
+    test('reads no redirects as none', () {
+      expect(decodeWebResponse({'status': 200}).redirects, isEmpty);
+    });
+
+    test('refuses a recorded redirect that carries a query, naming it', () {
       expect(
         () => decodeWebResponse({
           'status': 200,
-          'redirectedTo': 'https://tenant.sharepoint.com/d?tempauth=secret',
+          'redirects': [
+            'https://tenant.sharepoint.com/download',
+            'https://cdn.example.net/blob?tempauth=secret',
+          ],
         }),
-        throwsFormatException,
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('webResponse.redirects[1]'),
+          ),
+        ),
       );
     });
   });

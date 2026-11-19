@@ -11,12 +11,13 @@
   body's size and `Refused` anything over the cap; a text body that
   isn't UTF-8 is `Refused`; it never sends a sign-in's secret to another
   origin.
-- `WebResponse.redirectedTo`: a `RedirectedTo`, where a redirect the
-  driver followed ended up. It holds an http(s) address with its query,
-  fragment and credentials dropped, so the token in a pre-authenticated
-  download address never reaches the record. `RedirectedTo.of` drops
+- `WebResponse.redirects`: a `List<RedirectedTo>`, every hop the driver
+  followed, in order; empty when it followed none. Each `RedirectedTo`
+  holds an http(s) address with its query, fragment and credentials
+  dropped, so the token in a pre-authenticated download address never
+  reaches the record. `RedirectedTo.of` drops
   those parts; `parse` refuses a recorded address that has any of them.
-- The wire is additive: `keep`, `body` and `redirectedTo` are written
+- The wire is additive: `keep`, `body` and `redirects` are written
   only when set, so every existing record decodes as before. Bytes go
   as base64.
 

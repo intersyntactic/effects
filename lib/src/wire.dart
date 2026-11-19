@@ -534,8 +534,8 @@ Object? encodeWebResponse(WebResponse response) => {
   'created': response.created,
   'refusedBecause': response.refusedBecause,
   if (response.body is! NoBody) 'body': encodeResponseBody(response.body),
-  if (response.redirectedTo case final to?)
-    'redirectedTo': encodeRedirectedTo(to),
+  if (response.redirects.isNotEmpty)
+    'redirects': [for (final to in response.redirects) encodeRedirectedTo(to)],
 };
 
 WebResponse decodeWebResponse(Object? json, [String field = 'webResponse']) {
@@ -555,9 +555,14 @@ WebResponse decodeWebResponse(Object? json, [String field = 'webResponse']) {
     body: map.containsKey('body')
         ? decodeResponseBody(map['body'], '$field.body')
         : const NoBody(),
-    redirectedTo: map.containsKey('redirectedTo')
-        ? decodeRedirectedTo(map['redirectedTo'], '$field.redirectedTo')
-        : null,
+    redirects: switch (map['redirects']) {
+      null => const [],
+      final List<Object?> list => [
+        for (final (i, to) in list.indexed)
+          decodeRedirectedTo(to, '$field.redirects[$i]'),
+      ],
+      _ => throw FormatException('$field.redirects: not a list'),
+    },
   );
 }
 

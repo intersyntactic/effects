@@ -233,16 +233,15 @@ final class RedirectedTo {
 /// (why, in the site's own words, when [status] was not 2xx).
 ///
 /// [body] is what [Request.keep] asked for, only for a 2xx [status].
-/// [redirectedTo] is where the response came from when the driver followed
-/// a redirect. A refused sign-in, where nothing was sent, is [Refused],
-/// not this.
+/// [redirects] are the hops the driver followed to reach the response. A
+/// refused sign-in, where nothing was sent, is [Refused], not this.
 final class WebResponse {
   const WebResponse({
     required this.status,
     this.created,
     this.refusedBecause,
     this.body = const NoBody(),
-    this.redirectedTo,
+    this.redirects = const [],
   });
 
   final int status;
@@ -255,6 +254,7 @@ final class WebResponse {
 
   final ResponseBody body;
 
-  /// Null when no redirect was followed.
-  final RedirectedTo? redirectedTo;
+  /// Each address a followed redirect led to, in order, the last being
+  /// where [status] and [body] came from. Empty when none was followed.
+  final List<RedirectedTo> redirects;
 }
