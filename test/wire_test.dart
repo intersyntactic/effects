@@ -270,7 +270,7 @@ void main() {
     test('round-trips Finished with a model reply', () {
       final decoded = decodeProgramMessage(
         encodeProgramMessage(
-          Finished<ModelReply>(Ran(const ModelReply('hi'))),
+          Finished<ModelReply>(Ran(const FinishedReply(text: 'hi'))),
           encodeModelReply,
         ),
         decodeModelReply,
@@ -464,45 +464,56 @@ void main() {
   });
 
   group('ModelReply', () {
-    test('a reply with no usage is still the bare string', () {
-      expect(encodeModelReply(const ModelReply('hi')), 'hi');
+    test('a finished reply with no usage is still the bare string', () {
+      expect(encodeModelReply(const FinishedReply(text: 'hi')), 'hi');
     });
 
-    test('round-trips a bare string', () {
-      final reply = ModelReply('{"text": "hi"}');
-      expect(decodeModelReply(encodeModelReply(reply)).text, reply.text);
+    test('round-trips a bare string as a FinishedReply', () {
+      final reply = FinishedReply(text: '{"text": "hi"}');
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<FinishedReply>());
+      expect(decoded.text, reply.text);
     });
 
-    test('decodes a reply recorded before usage existed', () {
+    test('decodes a reply recorded before usage or incomplete existed', () {
       final decoded = decodeModelReply('hi');
+      expect(decoded, isA<FinishedReply>());
       expect(decoded.text, 'hi');
       expect(decoded.usage, isNull);
-      expect(decoded.incomplete, isFalse);
     });
 
     test('refuses a non-string, non-object', () {
       expect(() => decodeModelReply(1), throwsFormatException);
     });
 
-    test('round-trips with usage', () {
+    test('round-trips a FinishedReply with usage', () {
       const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
-      final reply = const ModelReply('hi', usage: usage);
+      final reply = const FinishedReply(text: 'hi', usage: usage);
       final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<FinishedReply>());
       expect(decoded.text, 'hi');
       expect(decoded.usage, usage);
-      expect(decoded.incomplete, isFalse);
     });
 
-    test('round-trips incomplete', () {
-      final reply = const ModelReply('cut off mid', incomplete: true);
+    test('round-trips a CutOffReply', () {
+      final reply = const CutOffReply(text: 'cut off mid');
       final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<CutOffReply>());
       expect(decoded.text, 'cut off mid');
-      expect(decoded.incomplete, isTrue);
     });
 
-    test('encodes usage and text, keyed, not as a bare string', () {
+    test('round-trips a CutOffReply with usage', () {
       const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
-      expect(encodeModelReply(const ModelReply('hi', usage: usage)), {
+      final reply = const CutOffReply(text: 'cut off mid', usage: usage);
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded, isA<CutOffReply>());
+      expect(decoded.text, 'cut off mid');
+      expect(decoded.usage, usage);
+    });
+
+    test('encodes a FinishedReply with usage, keyed, not as a bare string', () {
+      const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
+      expect(encodeModelReply(const FinishedReply(text: 'hi', usage: usage)), {
         'text': 'hi',
         'usage': {
           'input': 10,
@@ -512,6 +523,22 @@ void main() {
           'contextWindow': null,
         },
       });
+    });
+
+    test('encodes a CutOffReply with incomplete, even with no usage', () {
+      expect(encodeModelReply(const CutOffReply(text: 'cut off mid')), {
+        'text': 'cut off mid',
+        'incomplete': true,
+      });
+    });
+
+    test('a switch over ModelReply must handle both cases', () {
+      String describe(ModelReply reply) => switch (reply) {
+        FinishedReply() => 'finished',
+        CutOffReply() => 'cut off',
+      };
+      expect(describe(const FinishedReply(text: 'hi')), 'finished');
+      expect(describe(const CutOffReply(text: 'hi')), 'cut off');
     });
   });
 
