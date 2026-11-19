@@ -42,6 +42,16 @@ abstract interface class RunsPrograms implements CarriesOutActions {
 
 /// Reaches the world: carries out requests. Holds each sign-in's secret and
 /// applies it, so the airlock decides a [Request] without ever seeing one.
+///
+/// A 2xx response's body comes back as [Request.keep] asks: [TextBody] for
+/// text, [BytesBody] for bytes, [NoBody] otherwise. A text body that isn't
+/// UTF-8 is [Refused], never decoded loosely. How large a body it keeps is
+/// the driver's to decide: one over that is [Refused], since every byte
+/// kept is recorded.
+///
+/// Which redirects it follows is the driver's, and it never sends a
+/// sign-in's secret across to another origin; one it followed is named in
+/// [WebResponse.redirectedTo].
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
   Future<Outcome<WebResponse>> carryOutWebRequest(Request request);
 }

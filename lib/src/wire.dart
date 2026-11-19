@@ -454,6 +454,7 @@ Object? encodeRequest(Request request) => {
   'signIn': request.signIn == null ? null : encodeSignIn(request.signIn!),
   'headers': encodeHeaders(request.headers),
   'body': request.body,
+  if (request.keep != BodyToKeep.none) 'keep': encodeBodyToKeep(request.keep),
 };
 
 Request decodeRequest(Object? json, [String field = 'request']) {
@@ -477,7 +478,53 @@ Request decodeRequest(Object? json, [String field = 'request']) {
       final String body => body,
       _ => throw FormatException('$field.body: not a string'),
     },
+    keep: map.containsKey('keep')
+        ? decodeBodyToKeep(map['keep'], '$field.keep')
+        : BodyToKeep.none,
   );
+}
+
+// BodyToKeep
+
+Object? encodeBodyToKeep(BodyToKeep keep) => keep.name;
+
+BodyToKeep decodeBodyToKeep(Object? json, [String field = 'keep']) {
+  final raw = _string(json, field);
+  return BodyToKeep.values.where((k) => k.name == raw).firstOrNull ??
+      (throw FormatException('$field: not a body to keep ($raw)'));
+}
+
+// ResponseBody
+
+Object? encodeResponseBody(ResponseBody body) => switch (body) {
+  NoBody() => {'kind': 'none'},
+  TextBody(:final text) => {'kind': 'text', 'text': text},
+  BytesBody(:final bytes) => {'kind': 'bytes', 'base64': base64Encode(bytes)},
+};
+
+ResponseBody decodeResponseBody(Object? json, [String field = 'body']) {
+  final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
+  return switch (map['kind']) {
+    'none' => const NoBody(),
+    'text' => TextBody(_string(map['text'], '$field.text')),
+    'bytes' => BytesBody(_base64(map['base64'], '$field.base64')),
+    final other => throw FormatException(
+      '$field.kind: not "none", "text" or "bytes" ($other)',
+    ),
+  };
+}
+
+// RedirectedTo
+
+Object? encodeRedirectedTo(RedirectedTo to) => to.value.toString();
+
+RedirectedTo decodeRedirectedTo(Object? json, [String field = 'redirectedTo']) {
+  final raw = _string(json, field);
+  return RedirectedTo.parse(raw) ??
+      (throw FormatException(
+        '$field: not an http(s) address without query or credentials',
+      ));
 }
 
 // WebResponse
@@ -486,6 +533,9 @@ Object? encodeWebResponse(WebResponse response) => {
   'status': response.status,
   'created': response.created,
   'refusedBecause': response.refusedBecause,
+  if (response.body is! NoBody) 'body': encodeResponseBody(response.body),
+  if (response.redirectedTo case final to?)
+    'redirectedTo': encodeRedirectedTo(to),
 };
 
 WebResponse decodeWebResponse(Object? json, [String field = 'webResponse']) {
@@ -502,6 +552,12 @@ WebResponse decodeWebResponse(Object? json, [String field = 'webResponse']) {
       final String why => why,
       _ => throw FormatException('$field.refusedBecause: not a string'),
     },
+    body: map.containsKey('body')
+        ? decodeResponseBody(map['body'], '$field.body')
+        : const NoBody(),
+    redirectedTo: map.containsKey('redirectedTo')
+        ? decodeRedirectedTo(map['redirectedTo'], '$field.redirectedTo')
+        : null,
   );
 }
 
