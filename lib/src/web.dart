@@ -1,3 +1,5 @@
+import 'outcome.dart';
+
 /// An http(s) site a [Request] may be sent to: scheme, host and port only,
 /// with no path, query, fragment or credentials. A rule grants or denies by
 /// comparing one of these with `==`, so naming a site covers every request
@@ -142,32 +144,28 @@ final class Request {
   final SignIn? signIn;
   final Map<String, String> headers;
 
-  /// What reaches the destination alone. [WebRequestOutcome] keeps no copy
+  /// What reaches the destination alone. [WebResponse] keeps no copy
   /// of it: what a reader needs back — the model's output, the person's
   /// words — is already elsewhere in the record.
   final String? body;
 }
 
-/// What a [Request] did: [status], and either [created] (the id the
-/// destination made of it, when it made one) or [refusedBecause] (why,
-/// when [status] was not 2xx).
+/// The site's response to a [Request]: [status], and either [created] (the
+/// id the destination made of it, when it made one) or [refusedBecause]
+/// (why, in the site's own words, when [status] was not 2xx).
 ///
 /// Carries no body: naming the web request made, where it went and what
 /// came back is enough, since what it carried is already elsewhere in
-/// the record.
-final class WebRequestOutcome {
-  const WebRequestOutcome({
-    required this.status,
-    this.created,
-    this.refusedBecause,
-  });
+/// the record. A refused sign-in, where nothing was sent, is [Refused],
+/// not this.
+final class WebResponse {
+  const WebResponse({required this.status, this.created, this.refusedBecause});
 
   final int status;
   final String? created;
 
   /// Why the destination refused a non-2xx [status], in its own words,
   /// so a reader can say why without reaching into a log only the
-  /// driver's host can see. A refused sign-in, where nothing was sent,
-  /// is [Refused], not this.
+  /// driver's host can see.
   final String? refusedBecause;
 }

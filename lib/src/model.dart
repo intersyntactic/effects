@@ -52,7 +52,59 @@ final class ModelName {
 /// call as done (such as a `result` event's own text). Recorded once,
 /// as an outcome.
 final class ModelReply {
-  const ModelReply(this.text);
+  const ModelReply(this.text, {this.usage, this.incomplete = false});
 
   final String text;
+
+  /// What the call spent, when the driver can report it. Null for a
+  /// driver that can't (ChatGPT's plan has no cache-creation count or
+  /// context window), and for every reply recorded before [usage]
+  /// existed.
+  final ModelUsage? usage;
+
+  /// The call ran and spent tokens, but the reply was cut off before the
+  /// model was done — such as ChatGPT's own `incomplete` status. Still
+  /// recorded as [Ran], never [Refused]: tokens were spent, and a reply,
+  /// however partial, came back.
+  final bool incomplete;
+}
+
+/// What one model call spent. [input], [cacheRead] and [output] are what
+/// every driver checked so far can report; [cacheCreation] is null for a
+/// driver that can't tell it apart from [input] (ChatGPT's plan has no
+/// such count). [contextWindow] is the model's own limit, null when the
+/// driver can't tell it (ChatGPT's plan doesn't say).
+final class ModelUsage {
+  const ModelUsage({
+    required this.input,
+    required this.cacheRead,
+    required this.output,
+    this.cacheCreation,
+    this.contextWindow,
+  });
+
+  final int input;
+  final int cacheRead;
+  final int output;
+  final int? cacheCreation;
+  final int? contextWindow;
+
+  /// What counts against [contextWindow]: [input] and [cacheRead] (already
+  /// in context) plus whatever this call newly wrote into the cache.
+  /// Never [output]: a reply's tokens leave with the reply, not the
+  /// context.
+  int get context => input + cacheRead + (cacheCreation ?? 0);
+
+  @override
+  bool operator ==(Object other) =>
+      other is ModelUsage &&
+      other.input == input &&
+      other.cacheRead == cacheRead &&
+      other.output == output &&
+      other.cacheCreation == cacheCreation &&
+      other.contextWindow == contextWindow;
+
+  @override
+  int get hashCode =>
+      Object.hash(input, cacheRead, output, cacheCreation, contextWindow);
 }

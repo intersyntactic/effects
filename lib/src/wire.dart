@@ -302,12 +302,64 @@ ModelName decodeModelName(Object? json, [String field = 'model']) {
       (throw FormatException('$field: not a model name ($raw)'));
 }
 
+// ModelUsage
+
+Object? encodeModelUsage(ModelUsage usage) => {
+  'input': usage.input,
+  'cacheRead': usage.cacheRead,
+  'output': usage.output,
+  'cacheCreation': usage.cacheCreation,
+  'contextWindow': usage.contextWindow,
+};
+
+ModelUsage decodeModelUsage(Object? json, [String field = 'modelUsage']) {
+  final map = _object(json, field);
+  return ModelUsage(
+    input: _int(map['input'], '$field.input'),
+    cacheRead: _int(map['cacheRead'], '$field.cacheRead'),
+    output: _int(map['output'], '$field.output'),
+    cacheCreation: switch (map['cacheCreation']) {
+      null => null,
+      final int n => n,
+      _ => throw FormatException('$field.cacheCreation: not an int'),
+    },
+    contextWindow: switch (map['contextWindow']) {
+      null => null,
+      final int n => n,
+      _ => throw FormatException('$field.contextWindow: not an int'),
+    },
+  );
+}
+
 // ModelReply
 
-Object? encodeModelReply(ModelReply reply) => reply.text;
+Object? encodeModelReply(ModelReply reply) {
+  // Nothing beyond the text: the bare string every reply encoded as
+  // before 0.9.0, unchanged.
+  if (reply.usage == null && !reply.incomplete) return reply.text;
+  return {
+    'text': reply.text,
+    if (reply.usage != null) 'usage': encodeModelUsage(reply.usage!),
+    if (reply.incomplete) 'incomplete': true,
+  };
+}
 
 ModelReply decodeModelReply(Object? json, [String field = 'modelReply']) =>
-    ModelReply(_string(json, field));
+    switch (json) {
+      // A reply recorded before 0.9.0, or any driver that has no usage to
+      // add: just the text, exactly as decodeModelReply always read it.
+      final String text => ModelReply(text),
+      final Map<String, Object?> map => ModelReply(
+        _string(map['text'], '$field.text'),
+        usage: map['usage'] == null
+            ? null
+            : decodeModelUsage(map['usage'], '$field.usage'),
+        incomplete: map.containsKey('incomplete')
+            ? _bool(map['incomplete'], '$field.incomplete')
+            : false,
+      ),
+      _ => throw FormatException('$field: not a string or an object'),
+    };
 
 // ModelCall: the {signIn, model, systemPrompt, request} envelope sent over
 // the socket to an AsksTheModel service, so a caller and the service can't
@@ -391,20 +443,17 @@ Request decodeRequest(Object? json, [String field = 'request']) {
   );
 }
 
-// WebRequestOutcome
+// WebResponse
 
-Object? encodeWebRequestOutcome(WebRequestOutcome outcome) => {
-  'status': outcome.status,
-  'created': outcome.created,
-  'refusedBecause': outcome.refusedBecause,
+Object? encodeWebResponse(WebResponse response) => {
+  'status': response.status,
+  'created': response.created,
+  'refusedBecause': response.refusedBecause,
 };
 
-WebRequestOutcome decodeWebRequestOutcome(
-  Object? json, [
-  String field = 'webRequestOutcome',
-]) {
+WebResponse decodeWebResponse(Object? json, [String field = 'webResponse']) {
   final map = _object(json, field);
-  return WebRequestOutcome(
+  return WebResponse(
     status: _int(map['status'], '$field.status'),
     created: switch (map['created']) {
       null => null,

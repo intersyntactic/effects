@@ -427,14 +427,91 @@ void main() {
     });
   });
 
+  group('ModelUsage', () {
+    test('context is input + cacheRead + cacheCreation, never output', () {
+      const usage = ModelUsage(
+        input: 100,
+        cacheRead: 20,
+        output: 500,
+        cacheCreation: 7,
+      );
+      expect(usage.context, 127);
+    });
+
+    test('context treats a null cacheCreation as none spent', () {
+      const usage = ModelUsage(input: 100, cacheRead: 20, output: 500);
+      expect(usage.context, 120);
+    });
+
+    test('round-trips, with cacheCreation and contextWindow null', () {
+      const usage = ModelUsage(input: 10, cacheRead: 2, output: 30);
+      final decoded = decodeModelUsage(encodeModelUsage(usage));
+      expect(decoded, usage);
+      expect(decoded.cacheCreation, isNull);
+      expect(decoded.contextWindow, isNull);
+    });
+
+    test('round-trips, every field present', () {
+      const usage = ModelUsage(
+        input: 10,
+        cacheRead: 2,
+        output: 30,
+        cacheCreation: 4,
+        contextWindow: 1000000,
+      );
+      expect(decodeModelUsage(encodeModelUsage(usage)), usage);
+    });
+  });
+
   group('ModelReply', () {
-    test('round-trips', () {
+    test('a reply with no usage is still the bare string', () {
+      expect(encodeModelReply(const ModelReply('hi')), 'hi');
+    });
+
+    test('round-trips a bare string', () {
       final reply = ModelReply('{"text": "hi"}');
       expect(decodeModelReply(encodeModelReply(reply)).text, reply.text);
     });
 
-    test('refuses a non-string', () {
+    test('decodes a reply recorded before usage existed', () {
+      final decoded = decodeModelReply('hi');
+      expect(decoded.text, 'hi');
+      expect(decoded.usage, isNull);
+      expect(decoded.incomplete, isFalse);
+    });
+
+    test('refuses a non-string, non-object', () {
       expect(() => decodeModelReply(1), throwsFormatException);
+    });
+
+    test('round-trips with usage', () {
+      const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
+      final reply = const ModelReply('hi', usage: usage);
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded.text, 'hi');
+      expect(decoded.usage, usage);
+      expect(decoded.incomplete, isFalse);
+    });
+
+    test('round-trips incomplete', () {
+      final reply = const ModelReply('cut off mid', incomplete: true);
+      final decoded = decodeModelReply(encodeModelReply(reply));
+      expect(decoded.text, 'cut off mid');
+      expect(decoded.incomplete, isTrue);
+    });
+
+    test('encodes usage and text, keyed, not as a bare string', () {
+      const usage = ModelUsage(input: 10, cacheRead: 0, output: 5);
+      expect(encodeModelReply(const ModelReply('hi', usage: usage)), {
+        'text': 'hi',
+        'usage': {
+          'input': 10,
+          'cacheRead': 0,
+          'output': 5,
+          'cacheCreation': null,
+          'contextWindow': null,
+        },
+      });
     });
   });
 
@@ -501,21 +578,21 @@ void main() {
     });
   });
 
-  group('WebRequestOutcome', () {
+  group('WebResponse', () {
     test('round-trips a success', () {
-      final outcome = const WebRequestOutcome(status: 201, created: 'abc123');
-      final decoded = decodeWebRequestOutcome(encodeWebRequestOutcome(outcome));
+      final response = const WebResponse(status: 201, created: 'abc123');
+      final decoded = decodeWebResponse(encodeWebResponse(response));
       expect(decoded.status, 201);
       expect(decoded.created, 'abc123');
       expect(decoded.refusedBecause, isNull);
     });
 
     test('round-trips a failure', () {
-      final outcome = const WebRequestOutcome(
+      final response = const WebResponse(
         status: 400,
         refusedBecause: 'bad request',
       );
-      final decoded = decodeWebRequestOutcome(encodeWebRequestOutcome(outcome));
+      final decoded = decodeWebResponse(encodeWebResponse(response));
       expect(decoded.status, 400);
       expect(decoded.created, isNull);
       expect(decoded.refusedBecause, 'bad request');

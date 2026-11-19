@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.9.0
+
+- **Breaking:** `WebRequestOutcome` is now `WebResponse` (Nick, 2026-11-18):
+  it holds the site's HTTP response (`status`, `created`,
+  `refusedBecause`), nothing about the request or the airlock's own
+  outcome, and the old name collided with `Outcome<O>`, which it isn't
+  one of. `CarriesOutWebRequests.carryOutWebRequest` now returns
+  `Outcome<WebResponse>`. `encodeWebRequestOutcome`/
+  `decodeWebRequestOutcome` are now `encodeWebResponse`/
+  `decodeWebResponse`; the JSON shape (`status`, `created`,
+  `refusedBecause`, no type tag) is unchanged.
+- `ModelReply` gains `usage` (a new `ModelUsage`: `input`, `cacheRead`,
+  `output`, plus `cacheCreation` and `contextWindow`, both null when a
+  driver can't report them) and `incomplete` (the call ran and spent
+  tokens, but the reply was cut off before the model was done — such as
+  ChatGPT's own `incomplete` status; still recorded as `Ran`, never
+  `Refused`, since tokens were spent and a reply did come back).
+  `ModelUsage.context` is `input + cacheRead + (cacheCreation ?? 0)` —
+  never `output`, which leaves with the reply rather than staying in
+  context — matching how the monorepo's `intersyntactic_protocol`
+  already counts it (agent_loop, 2026-11-19). Additive and non-breaking:
+  both new fields are optional, and `encodeModelReply` still writes a
+  bare string when neither is set, identical to every reply recorded
+  before this version; `decodeModelReply` still reads a bare string as
+  a reply with no usage. Once a reply does carry `usage` or
+  `incomplete`, it encodes as an object instead — breaking for a reader
+  that matches the old bare-string shape directly, such as
+  `is_airlock_api`'s plain-message projection (flagged to
+  airlock-api-b3, who confirmed it reads replies through
+  `decodeModelReply` rather than matching the shape itself).
+
 ## 0.8.0
 
 - **Breaking:** `ProgramMessage` (and its two cases, `Reported` and
