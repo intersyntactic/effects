@@ -2,13 +2,15 @@
 
 ## 0.12.0
 
-- `BuildsReplyRequests`: what a relay's module implements so the airlock
-  can answer one of its events. `replyRequests(relayedEvent:, reply:,
-  signIn:)` returns the `Request`s that post a `ModelReply` back to where
-  the event came from, in posting order, or null when the event isn't
-  one the module can answer. `relayedEvent` is the event's bytes as its
-  relay recorded them, so is_effects needs no docking station type. The
-  module only builds: the airlock decides each request and the web
+- `BuildsRequestsAnsweringEvents`: what a relay's module implements so
+  the airlock can post back to where one of its events came from without
+  knowing that relay's wire. `trajectoryOpenedRequests(relayedEvent:,
+  signIn:)` builds the requests saying a trajectory opened for the event;
+  `replyRequests(relayedEvent:, reply:, signIn:)` builds the requests
+  that post a `ModelReply`, in posting order. Each is null when the event
+  isn't one the module can answer. `relayedEvent` is the event's bytes as
+  its relay recorded them, so is_effects needs no docking station type.
+  The module only builds: the airlock decides each request and the web
   request driver sends it.
 - `BotPool`: the name of a pool of bots a trajectory leases one from,
   shaped like `SignIn` (`parse` returns null unless it is lowercase
