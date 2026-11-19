@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.1
+
+- `ReadsAndWritesFiles` and `CarriesOutWebRequests` say a text read
+  keeps a leading byte order mark (U+FEFF). Dart's `utf8.decode` drops
+  it, so a driver that decodes with it doesn't return the exact text,
+  and reading then writing a file strips the BOM from disk. Doc only.
+
 ## 0.11.0
 
 - `WebResponse` can carry a body. `Request.keep` (`BodyToKeep`: `none`,

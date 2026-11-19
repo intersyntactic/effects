@@ -170,7 +170,8 @@ final class NoBody extends ResponseBody {
   const NoBody();
 }
 
-/// The body decoded as UTF-8, for [BodyToKeep.text].
+/// The body decoded as UTF-8, a leading byte order mark included, for
+/// [BodyToKeep.text].
 final class TextBody extends ResponseBody {
   const TextBody(this.text);
 
