@@ -21,8 +21,11 @@ abstract interface class CarriesOutActions {}
 ///
 /// The caller chooses text or bytes, so the airlock decides on exactly what
 /// will come back. A file [read] as text that isn't UTF-8 is [Refused], never
-/// decoded loosely. How large a file [readBytes] returns is the driver's to
-/// decide: one over that is [Refused], since every byte returned is recorded.
+/// decoded loosely. [ReadText] is the file's exact text, a leading byte order
+/// mark (U+FEFF) included, which Dart's `utf8.decode` would drop; a [write]
+/// of it puts back the bytes that were read. How large a file [readBytes]
+/// returns is the driver's to decide: one over that is [Refused], since
+/// every byte returned is recorded.
 abstract interface class ReadsAndWritesFiles implements CarriesOutActions {
   Future<Outcome<ReadResult>> read(RelativePath path);
   Future<Outcome<BytesReadResult>> readBytes(RelativePath path);
@@ -45,9 +48,10 @@ abstract interface class RunsPrograms implements CarriesOutActions {
 ///
 /// A 2xx response's body comes back as [Request.keep] asks: [TextBody] for
 /// text, [BytesBody] for bytes, [NoBody] otherwise. A text body that isn't
-/// UTF-8 is [Refused], never decoded loosely. How large a body it keeps is
-/// the driver's to decide: one over that is [Refused], since every byte
-/// kept is recorded.
+/// UTF-8 is [Refused], never decoded loosely, and a [TextBody] keeps a
+/// leading byte order mark (U+FEFF), as a file read does. How large a body
+/// it keeps is the driver's to decide: one over that is [Refused], since
+/// every byte kept is recorded.
 ///
 /// Which redirects it follows is the driver's, and it never sends a
 /// sign-in's secret across to another origin; every hop it followed is
