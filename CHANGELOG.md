@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.12.0
+
+- `BuildsReplyRequests`: what a relay's module implements so the airlock
+  can answer one of its events. `replyRequests(relayedEvent:, reply:,
+  signIn:)` returns the `Request`s that post a `ModelReply` back to where
+  the event came from, in posting order, or null when the event isn't
+  one the module can answer. `relayedEvent` is the event's bytes as its
+  relay recorded them, so is_effects needs no docking station type. The
+  module only builds: the airlock decides each request and the web
+  request driver sends it.
+
 ## 0.11.1
 
 - `ReadsAndWritesFiles` and `CarriesOutWebRequests` say a text read

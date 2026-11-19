@@ -14,5 +14,6 @@ export 'src/model.dart';
 export 'src/outcome.dart';
 export 'src/program.dart';
 export 'src/relative_path.dart';
+export 'src/reply.dart';
 export 'src/web.dart';
 export 'src/wire.dart';
