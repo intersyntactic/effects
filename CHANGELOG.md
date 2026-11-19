@@ -10,6 +10,10 @@
   relay recorded them, so is_effects needs no docking station type. The
   module only builds: the airlock decides each request and the web
   request driver sends it.
+- `BotPool`: the name of a pool of bots a trajectory leases one from,
+  shaped like `SignIn` (`parse` returns null unless it is lowercase
+  letters, digits, `-` and `_`). Wire: the bare name, via
+  `encodeBotPool`/`decodeBotPool`.
 
 ## 0.11.1
 
