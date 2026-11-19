@@ -2,11 +2,11 @@
 
 ## 0.9.0
 
-- **Breaking:** `WebRequestOutcome` is now `WebResponse` (Nick, 2026-11-18):
-  it holds the site's HTTP response (`status`, `created`,
-  `refusedBecause`), nothing about the request or the airlock's own
-  outcome, and the old name collided with `Outcome<O>`, which it isn't
-  one of. `CarriesOutWebRequests.carryOutWebRequest` now returns
+- **Breaking:** `WebRequestOutcome` is now `WebResponse`: it holds the
+  site's HTTP response (`status`, `created`, `refusedBecause`), nothing
+  about the request or the airlock's own outcome, and the old name
+  collided with `Outcome<O>`, which it isn't one of.
+  `CarriesOutWebRequests.carryOutWebRequest` now returns
   `Outcome<WebResponse>`. `encodeWebRequestOutcome`/
   `decodeWebRequestOutcome` are now `encodeWebResponse`/
   `decodeWebResponse`; the JSON shape (`status`, `created`,
@@ -14,30 +14,25 @@
 - **Breaking:** `ModelReply` is now a sealed class: `FinishedReply` (the
   model's whole text) or `CutOffReply` (the call ran and spent tokens,
   but the reply ended before the model was done — such as ChatGPT's own
-  `incomplete` status; still recorded as `Ran`, never `Refused`, since
-  tokens were spent and a reply did come back). A first draft gave
-  `ModelReply` a plain `incomplete` flag instead, but agent-loop-21
-  pushed back: a bare bool a reader forgets to check lets a half-sentence
-  reach Teams, or an agent's history, as if the model had finished —
-  exactly the kind of rule two call sites would each have to remember to
-  check, so the type now carries it. Any code built against the old
-  concrete `ModelReply(text, ...)` needs updating to `FinishedReply(text:
-  ...)` or `CutOffReply(text: ...)`.
-- Both gain `usage` (a new `ModelUsage`: `input`, `cacheRead`, `output`,
-  plus `cacheCreation` and `contextWindow`, both null when a driver
-  can't report them). `ModelUsage.context` is
+  `incomplete` status). A cut-off reply is still recorded as `Ran`, never
+  `Refused`, since tokens were spent and a reply did come back; the
+  split exists so a switch over `ModelReply` has to say what it does
+  with a cut-off one, rather than leave that to a flag a reader could
+  forget to check. Any code built against the old concrete
+  `ModelReply(text, ...)` needs updating to `FinishedReply(text: ...)`
+  or `CutOffReply(text: ...)`.
+- Both variants gain `usage` (a new `ModelUsage`: `input`, `cacheRead`,
+  `output`, plus `cacheCreation` and `contextWindow`, both null when a
+  driver can't report them). `ModelUsage.context` is
   `input + cacheRead + (cacheCreation ?? 0)` — never `output`, which
-  leaves with the reply rather than staying in context — matching how
-  the monorepo's `intersyntactic_protocol` already counts it
-  (agent_loop, 2026-11-19). The wire stays additive where it can:
-  `encodeModelReply` still writes a bare string for a `FinishedReply`
-  with no usage, identical to every reply recorded before this version,
-  and `decodeModelReply` still reads a bare string that way. Any other
-  reply — usage set, or cut off — encodes as an object instead, which is
-  breaking for a reader that matches the old bare-string shape directly,
-  such as `is_airlock_api`'s plain-message projection (flagged to
-  airlock-api-b3, who confirmed it reads replies through
-  `decodeModelReply` rather than matching the shape itself).
+  leaves with the reply rather than staying in context. The wire stays
+  additive where it can: `encodeModelReply` still writes a bare string
+  for a `FinishedReply` with no usage, identical to every reply recorded
+  before this version, and `decodeModelReply` still reads a bare string
+  that way. Any other reply — usage set, or cut off — encodes as an
+  object instead, which is breaking for a reader that matches the old
+  bare-string shape directly rather than reading through
+  `decodeModelReply`.
 
 ## 0.8.0
 
