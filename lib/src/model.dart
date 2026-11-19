@@ -46,6 +46,25 @@ final class ModelName {
   String toString() => value;
 }
 
+/// A [model] and the [signIn] it is called under, such as a starting
+/// model a trajectory begins with.
+final class ModelAndSignIn {
+  const ModelAndSignIn({required this.signIn, required this.model});
+
+  final ModelSignInName signIn;
+  final ModelName model;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ModelAndSignIn && other.signIn == signIn && other.model == model;
+
+  @override
+  int get hashCode => Object.hash(signIn, model);
+
+  @override
+  String toString() => '$model under $signIn';
+}
+
 /// What the model said, in reply to one call: not the transport it
 /// arrived in, nor the pieces streamed beforehand ([ReplyArriving],
 /// never recorded) — a driver whose wire is a stream of events gives the

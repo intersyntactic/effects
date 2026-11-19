@@ -461,6 +461,40 @@ void main() {
     });
   });
 
+  group('ModelAndSignIn', () {
+    final pair = ModelAndSignIn(
+      signIn: ModelSignInName.parse('nick-claude-team')!,
+      model: ModelName.parse('claude-opus-5-5')!,
+    );
+
+    test('round-trips', () {
+      expect(decodeModelAndSignIn(encodeModelAndSignIn(pair)), pair);
+    });
+
+    test('is written as signIn and model', () {
+      expect(encodeModelAndSignIn(pair), {
+        'signIn': 'nick-claude-team',
+        'model': 'claude-opus-5-5',
+      });
+    });
+
+    test('refuses an invalid sign-in, naming the field', () {
+      expect(
+        () => decodeModelAndSignIn({
+          'signIn': 'Not Valid',
+          'model': 'claude-opus-5-5',
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('modelAndSignIn.signIn'),
+          ),
+        ),
+      );
+    });
+  });
+
   group('ModelUsage', () {
     test('context is input + cacheRead + cacheCreation, never output', () {
       const usage = ModelUsage(
