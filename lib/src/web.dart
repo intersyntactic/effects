@@ -74,14 +74,41 @@ final class WebPath {
 
   static const root = WebPath._('');
 
-  /// [raw] as a path on an origin, or null unless it starts with exactly
-  /// one `/` and carries no `..` segment or `@`, each a way a path could
-  /// name somewhere other than where it was decided to go.
+  /// [raw] as a path on an origin, optionally with a `?` query, or null
+  /// unless it is exactly what is sent: it starts with exactly one `/`,
+  /// carries no `..`, `@`, `%25` or `#`, and a URI parser leaves its path
+  /// and query byte for byte as they are.
+  ///
+  /// A parser collapses `%2e%2e`, `.%2E` and `./` segments, so a path
+  /// decided as `/a/%2e%2e/b` would be sent as `/b`. `%25` is refused
+  /// because `%252e%252e` passes through unchanged and becomes `..` at a
+  /// server that decodes twice. Escapes must be uppercase hex (`%2F`, not
+  /// `%2f`) and unreserved characters must not be escaped (`.`, not
+  /// `%2E`), since a parser rewrites both: `Uri.encodeComponent` produces
+  /// escapes that pass.
   static WebPath? parse(String raw) {
     if (!raw.startsWith('/') || raw.startsWith('//')) return null;
-    if (raw.contains('..') || raw.contains('@')) return null;
+    if (raw.contains('..') ||
+        raw.contains('@') ||
+        raw.contains('%25') ||
+        raw.contains('#')) {
+      return null;
+    }
+    final queryAt = raw.indexOf('?');
+    final path = queryAt < 0 ? raw : raw.substring(0, queryAt);
+    final query = queryAt < 0 ? null : raw.substring(queryAt + 1);
+    final parsed = Uri.tryParse('$_anyOrigin$raw');
+    if (parsed == null ||
+        parsed.path != path ||
+        parsed.hasQuery != (query != null) ||
+        (query != null && parsed.query != query)) {
+      return null;
+    }
     return WebPath._(raw);
   }
+
+  // The origin doesn't change how an http(s) path or query parses.
+  static const _anyOrigin = 'https://origin.invalid';
 
   final String value;
 

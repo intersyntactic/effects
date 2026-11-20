@@ -425,6 +425,7 @@ void main() {
     test('refuses an unsafe path', () {
       expect(() => decodeWebPath('/../x'), throwsFormatException);
       expect(() => decodeWebPath('/@evil.example'), throwsFormatException);
+      expect(() => decodeWebPath('/a/%2e%2e/b'), throwsFormatException);
     });
   });
 
