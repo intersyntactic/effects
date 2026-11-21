@@ -6,8 +6,10 @@
   parsing it after an origin must leave its path and query byte for byte
   as they are. This refuses escaped dot segments (`%2e%2e`, `.%2E`,
   `%2E.`, `./`), which a URI parser collapses, so `/a/%2e%2e/b` was
-  sent as `/b`. Also refused: any `%25`, which a server that decodes twice
-  turns back into an escape; lowercase escapes (`%2f`) and escaped
+  sent as `/b`. Also refused: `%25` followed by `2e`, `2f`, `5c` or `25`
+  in either case, which a server that decodes twice turns into `.`, `/`,
+  `\` or another escape (any other `%25`, as in `50%25.docx`, is an
+  ordinary `%`); lowercase escapes (`%2f`) and escaped
   unreserved characters (`%2E`), which a parser rewrites; and a
   fragment. A query is still allowed if it is left as it is.
   `Uri.encodeComponent` output passes. Breaking: a path that parsed

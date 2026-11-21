@@ -43,9 +43,20 @@ void main() {
       expect(WebPath.parse('/x%2F%2E%2E%2F'), isNull);
     });
 
-    test('refuses an escaped percent, which a double decode would open', () {
+    test('refuses a %25 a second decode would turn into structure', () {
+      for (final escape in ['2e', '2E', '2f', '2F', '5c', '5C', '25']) {
+        expect(WebPath.parse('/a/%25$escape/b'), isNull, reason: escape);
+      }
       expect(WebPath.parse('/abc/%252e%252e/xyz'), isNull);
-      expect(WebPath.parse('/a%25b'), isNull);
+      expect(WebPath.parse('/abc/%252E%252e/xyz'), isNull);
+    });
+
+    test('accepts any other %25, an ordinary percent', () {
+      final name = Uri.encodeComponent('50% budget.docx');
+      expect(name, '50%25%20budget.docx');
+      expect(WebPath.parse('/f:/$name:/content'), isNotNull);
+      expect(WebPath.parse('/a%25b'), isNotNull);
+      expect(WebPath.parse('/a%252'), isNotNull);
     });
 
     test('refuses an escape a parser would rewrite', () {
