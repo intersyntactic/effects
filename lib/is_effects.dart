@@ -8,7 +8,6 @@
 /// airlock.
 library;
 
-export 'src/answering_events.dart';
 export 'src/bot_pool.dart';
 export 'src/drivers.dart';
 export 'src/file.dart';

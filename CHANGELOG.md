@@ -27,6 +27,11 @@
   trajectory's reply endpoint or a fetch grant's bound.
   `covers(Origin, WebPath)`. Wire: `{"origin", "pathPrefix"}` via
   `encodeAddressPrefix`/`decodeAddressPrefix`.
+- `BuildsRequestsAnsweringEvents` is removed. The airlock no longer
+  builds replies: a turn's final text goes to the conversation's reply
+  tool, which builds and proposes its own requests. Breaking for its
+  implementers and callers (teams_module and the airlock), both of
+  which drop it in the move to this version.
 
 ## 0.12.0
 
