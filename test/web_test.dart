@@ -33,6 +33,63 @@ void main() {
       expect(WebPath.parse('/..'), isNull);
     });
 
+    test('refuses an escaped dot segment a parser would collapse', () {
+      expect(WebPath.parse('/v1.0/drives/abc/%2e%2e/xyz/items'), isNull);
+      expect(WebPath.parse('/v1.0/drives/abc/%2E%2E/xyz/items'), isNull);
+      expect(WebPath.parse('/a/.%2E/b'), isNull);
+      expect(WebPath.parse('/a/%2E./b'), isNull);
+      expect(WebPath.parse('/a/./b'), isNull);
+      expect(WebPath.parse('/a/.'), isNull);
+      expect(WebPath.parse('/x%2F%2E%2E%2F'), isNull);
+    });
+
+    test('refuses a %25 a second decode would turn into structure', () {
+      for (final escape in ['2e', '2E', '2f', '2F', '5c', '5C', '25']) {
+        expect(WebPath.parse('/a/%25$escape/b'), isNull, reason: escape);
+      }
+      expect(WebPath.parse('/abc/%252e%252e/xyz'), isNull);
+      expect(WebPath.parse('/abc/%252E%252e/xyz'), isNull);
+    });
+
+    test('accepts any other %25, an ordinary percent', () {
+      final name = Uri.encodeComponent('50% budget.docx');
+      expect(name, '50%25%20budget.docx');
+      expect(WebPath.parse('/f:/$name:/content'), isNotNull);
+      expect(WebPath.parse('/a%25b'), isNotNull);
+      expect(WebPath.parse('/a%252'), isNotNull);
+    });
+
+    test('refuses an escape a parser would rewrite', () {
+      expect(WebPath.parse('/a%2fb'), isNull);
+      expect(WebPath.parse('/a b'), isNull);
+      expect(WebPath.parse('/ä'), isNull);
+    });
+
+    test('accepts uppercase escapes with no dot', () {
+      expect(WebPath.parse('/a%2Fb')?.value, '/a%2Fb');
+      expect(
+        WebPath.parse(
+          '/amer/v3/conversations/${Uri.encodeComponent('19:abc@thread.tacv2')}'
+          '/activities',
+        ),
+        isNotNull,
+      );
+    });
+
+    test('accepts a query a parser leaves as it is', () {
+      const listing =
+          r'/v1.0/drives/d/root:/f:/children'
+          r'?$select=name,size,lastModifiedDateTime,folder';
+      expect(WebPath.parse(listing)?.value, listing);
+    });
+
+    test('refuses a query a parser would rewrite, and a fragment', () {
+      expect(WebPath.parse(r'/a?$filter=name eq 1'), isNull);
+      expect(WebPath.parse('/a?x=%2e'), isNull);
+      expect(WebPath.parse('/a?x=1#f'), isNull);
+      expect(WebPath.parse('/a#f'), isNull);
+    });
+
     test('equality is by value', () {
       expect(WebPath.parse('/a'), WebPath.parse('/a'));
       expect(WebPath.parse('/a'), isNot(WebPath.parse('/b')));
