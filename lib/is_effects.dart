@@ -14,6 +14,7 @@ export 'src/drivers.dart';
 export 'src/file.dart';
 export 'src/model.dart';
 export 'src/outcome.dart';
+export 'src/place_in_trajectory.dart';
 export 'src/program.dart';
 export 'src/relative_path.dart';
 export 'src/web.dart';
