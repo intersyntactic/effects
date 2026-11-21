@@ -14,22 +14,6 @@
   fragment. A query is still allowed if it is left as it is.
   `Uri.encodeComponent` output passes. Breaking: a path that parsed
   before may now be null.
-- `PlaceInTrajectory` moves here from is_airlock_api, unchanged: a turn
-  and a step, both from 0, with `at`, `parse`, `[turn, step]` JSON,
-  ordering by turn then step, and `toString` as `turn.step`.
-  is_airlock_api will re-export it.
-- `BuildsRequestsAnsweringEvents`: `trajectoryOpenedRequests` and
-  `replyRequests` take a required `place`, the `PlaceInTrajectory` the
-  answer comes from, for a card to print or leave off. It is the loop's
-  claim and the airlock verifies nothing about it: show it, never decide
-  by it. Breaking for implementers.
-- `BuildsRequestsAnsweringEvents.refusalNoticeRequests(relayedEvent:,
-  place:, why:, signIn:)`: the requests that tell an event's sender an
-  action was refused and why, so they can decide what happens next.
-  `why` is a `Refused.why` as the airlock recorded it, checked to come
-  from a refusal. Breaking for implementers.
-- `Refused.why` says it can be shown to the person, so a refuser never
-  puts what an action read, or a secret, in it.
 
 ## 0.12.0
 
