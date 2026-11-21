@@ -14,6 +14,11 @@
   fragment. A query is still allowed if it is left as it is.
   `Uri.encodeComponent` output passes. Breaking: a path that parsed
   before may now be null.
+- `BuildsRequestsAnsweringEvents` is removed. The airlock no longer
+  builds replies: a turn's final text goes to the conversation's reply
+  tool, which builds and proposes its own requests. Breaking for its
+  implementers and callers (teams_module and the airlock), both of
+  which drop it in the move to this version.
 
 ## 0.12.0
 
