@@ -25,6 +25,14 @@ final class _PostsToTheNamedSite implements BuildsRequestsAnsweringEvents {
     CutOffReply(:final text) => 'turn ${place.turn}: $text',
   });
 
+  @override
+  List<Request>? refusalNoticeRequests({
+    required Uint8List relayedEvent,
+    required PlaceInTrajectory place,
+    required String why,
+    required SignIn signIn,
+  }) => _post(relayedEvent, signIn, 'turn ${place.turn} refused: $why');
+
   List<Request>? _post(Uint8List relayedEvent, SignIn signIn, String body) {
     final origin = Origin.parse(utf8.decode(relayedEvent));
     if (origin == null) return null;
@@ -62,7 +70,26 @@ void main() {
     expect(requests.single.body, 'opened at turn 0');
   });
 
-  test('is null for an event it cannot answer, from either method', () {
+  test('builds the refusal notice for an event it can answer', () {
+    final requests = module.refusalNoticeRequests(
+      relayedEvent: answerable,
+      place: later,
+      why: 'the airlock denied it',
+      signIn: signIn,
+    )!;
+    expect(requests.single.body, 'turn 3 refused: the airlock denied it');
+  });
+
+  test('is null for an event it cannot answer, from every method', () {
+    expect(
+      module.refusalNoticeRequests(
+        relayedEvent: unanswerable,
+        place: later,
+        why: 'the airlock denied it',
+        signIn: signIn,
+      ),
+      isNull,
+    );
     expect(
       module.replyRequests(
         relayedEvent: unanswerable,
