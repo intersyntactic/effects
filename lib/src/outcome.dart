@@ -16,5 +16,9 @@ final class Ran<O> extends Outcome<O> {
 final class Refused extends Outcome<Never> {
   const Refused(this.why);
 
+  /// Why, in the refuser's own words. It is recorded and can be shown to
+  /// the person who started the trajectory, such as on a Teams card, so it
+  /// never carries what an action read (file text, a response body) or a
+  /// secret (a token, or an address with its query).
   final String why;
 }
