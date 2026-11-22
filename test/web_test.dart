@@ -134,4 +134,108 @@ void main() {
       );
     });
   });
+
+  group('PathPrefix', () {
+    PathPrefix prefix(String raw) => PathPrefix.parse(raw)!;
+    WebPath path(String raw) => WebPath.parse(raw)!;
+
+    test('accepts a prefix that starts and ends with / and keeps it', () {
+      expect(prefix('/v1.0/drives/d/').value, '/v1.0/drives/d/');
+      expect(prefix('/').value, '/');
+    });
+
+    test('refuses one with no trailing /, a query, or an unsafe path', () {
+      for (final raw in [
+        '',
+        'a/',
+        '/a',
+        '/a/?x=1/',
+        '/a/%2e%2e/',
+        '/@evil/',
+        '//evil/',
+        '/a/%C3/',
+        '/a/%ZZ/',
+        '/a/%/',
+      ]) {
+        expect(PathPrefix.parse(raw), isNull, reason: raw);
+      }
+    });
+
+    test('covers paths under it at a segment boundary', () {
+      final drive = prefix('/drives/abc/');
+      expect(drive.covers(path('/drives/abc/')), isTrue);
+      expect(drive.covers(path('/drives/abc/items/1')), isTrue);
+      expect(drive.covers(path('/drives/abc/items?\$top=5')), isTrue);
+      expect(drive.covers(path('/drives/abcdef/')), isFalse);
+      expect(drive.covers(path('/drives/abc')), isFalse, reason: 'itself');
+      expect(drive.covers(path('/drives/')), isFalse);
+      expect(drive.covers(path('/other/abc/x')), isFalse);
+    });
+
+    test('compares segments canonically, either spelling', () {
+      final graph = prefix('/v1.0/drives/d/root:/Shared/');
+      expect(
+        graph.covers(path('/v1.0/drives/d/root:/Shared/a.docx:/content')),
+        isTrue,
+      );
+      expect(graph.covers(path('/v1.0/drives/d/root%3A/Shared/x')), isTrue);
+      final teams = prefix('/amer/v3/conversations/19%3Aabc%40thread.v2/');
+      expect(
+        teams.covers(path('/amer/v3/conversations/19:abc%40thread.v2/x')),
+        isTrue,
+      );
+      expect(prefix('/a/19:x/'), prefix('/a/19%3Ax/'));
+      expect(prefix('/a/19:x/').hashCode, prefix('/a/19%3Ax/').hashCode);
+    });
+
+    test('an escaped / stays inside its segment', () {
+      expect(prefix('/a/').covers(path('/a%2Fb/c')), isFalse);
+      expect(prefix('/a%2Fb/').covers(path('/a/b/c')), isFalse);
+      expect(prefix('/a%2Fb/').covers(path('/a%2Fb/c')), isTrue);
+    });
+
+    test('does not cover a path whose segment does not decode', () {
+      expect(prefix('/a/').covers(path('/a/%C3')), isFalse);
+    });
+
+    test('/ is the whole site, root included', () {
+      expect(prefix('/').covers(path('/anything/at/all')), isTrue);
+      expect(prefix('/').covers(WebPath.root), isTrue);
+    });
+  });
+
+  group('AddressPrefix', () {
+    final teams = Origin.parse('https://smba.trafficmanager.net')!;
+    final other = Origin.parse('https://evil.example')!;
+    final endpoint = AddressPrefix.of(
+      teams,
+      PathPrefix.parse('/amer/v3/conversations/c/')!,
+    );
+
+    test('covers a path under its prefix on its own origin only', () {
+      final reply = WebPath.parse('/amer/v3/conversations/c/activities')!;
+      expect(endpoint.covers(teams, reply), isTrue);
+      expect(endpoint.covers(other, reply), isFalse);
+      expect(
+        endpoint.covers(teams, WebPath.parse('/amer/v3/conversations/d/x')!),
+        isFalse,
+      );
+    });
+
+    test('equality is by origin and canonical prefix', () {
+      expect(
+        endpoint,
+        AddressPrefix.of(teams, PathPrefix.parse('/amer/v3/conversations/c/')!),
+      );
+      expect(
+        endpoint,
+        isNot(
+          AddressPrefix.of(
+            other,
+            PathPrefix.parse('/amer/v3/conversations/c/')!,
+          ),
+        ),
+      );
+    });
+  });
 }

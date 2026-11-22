@@ -14,6 +14,19 @@
   fragment. A query is still allowed if it is left as it is.
   `Uri.encodeComponent` output passes. Breaking: a path that parsed
   before may now be null.
+- `PathPrefix`: the start of the paths something may reach on an
+  origin. `parse` returns null unless it starts and ends with `/`, has
+  no `?`, is a valid `WebPath` and every segment is UTF-8; `/` alone is
+  the whole site. `covers(WebPath)` is true when the path, without its
+  query, has more segments than the prefix and starts with all of its
+  segments, compared canonically (each decoded and encoded again with
+  `Uri.encodeComponent`), so `19:` and `19%3A` match while a request is
+  still sent as written. `==` is canonical too. Wire: the bare string,
+  as written, via `encodePathPrefix`/`decodePathPrefix`.
+- `AddressPrefix`: an `Origin` and a `PathPrefix`, such as a
+  trajectory's reply endpoint or a fetch grant's bound.
+  `covers(Origin, WebPath)`. Wire: `{"origin", "pathPrefix"}` via
+  `encodeAddressPrefix`/`decodeAddressPrefix`.
 - `PlaceInTrajectory` moves here from is_airlock_api, unchanged: a turn
   and a step, both from 0, with `at`, `parse`, `[turn, step]` JSON,
   ordering by turn then step, and `toString` as `turn.step`.

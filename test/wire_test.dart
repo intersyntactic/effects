@@ -780,6 +780,52 @@ void main() {
     });
   });
 
+  group('PathPrefix', () {
+    test('round-trips as the bare string, as written', () {
+      final prefix = PathPrefix.parse('/a/19:x/')!;
+      expect(encodePathPrefix(prefix), '/a/19:x/');
+      expect(decodePathPrefix(encodePathPrefix(prefix)).value, '/a/19:x/');
+    });
+
+    test('refuses one that is not a path prefix', () {
+      expect(() => decodePathPrefix('/a'), throwsFormatException);
+      expect(() => decodePathPrefix(3), throwsFormatException);
+    });
+  });
+
+  group('AddressPrefix', () {
+    test('round-trips through JSON', () {
+      final prefix = AddressPrefix.of(
+        Origin.parse('https://graph.microsoft.com')!,
+        PathPrefix.parse('/v1.0/drives/d/')!,
+      );
+      expect(
+        decodeAddressPrefix(
+          jsonDecode(jsonEncode(encodeAddressPrefix(prefix))),
+        ),
+        prefix,
+      );
+    });
+
+    test('refuses a missing or invalid part, naming it', () {
+      expect(
+        () => decodeAddressPrefix({'origin': 'https://a.example'}),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('addressPrefix.pathPrefix'),
+          ),
+        ),
+      );
+      expect(
+        () =>
+            decodeAddressPrefix({'origin': 'not a site', 'pathPrefix': '/a/'}),
+        throwsFormatException,
+      );
+    });
+  });
+
   group('RedirectedTo', () {
     test('drops the query, fragment and credentials', () {
       final to = RedirectedTo.of(

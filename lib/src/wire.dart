@@ -305,6 +305,34 @@ WebPath decodeWebPath(Object? json, [String field = 'path']) {
       (throw FormatException('$field: not a web path ($raw)'));
 }
 
+// PathPrefix
+
+Object? encodePathPrefix(PathPrefix prefix) => prefix.value;
+
+PathPrefix decodePathPrefix(Object? json, [String field = 'pathPrefix']) {
+  final raw = _string(json, field);
+  return PathPrefix.parse(raw) ??
+      (throw FormatException('$field: not a path prefix ($raw)'));
+}
+
+// AddressPrefix
+
+Object? encodeAddressPrefix(AddressPrefix prefix) => {
+  'origin': encodeOrigin(prefix.origin),
+  'pathPrefix': encodePathPrefix(prefix.pathPrefix),
+};
+
+AddressPrefix decodeAddressPrefix(
+  Object? json, [
+  String field = 'addressPrefix',
+]) {
+  final map = _object(json, field);
+  return AddressPrefix.of(
+    decodeOrigin(map['origin'], '$field.origin'),
+    decodePathPrefix(map['pathPrefix'], '$field.pathPrefix'),
+  );
+}
+
 // SignIn
 
 Object? encodeSignIn(SignIn signIn) => signIn.name;
