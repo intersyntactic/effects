@@ -32,6 +32,16 @@
   tool, which builds and proposes its own requests. Breaking for its
   implementers and callers (teams_module and the airlock), both of
   which drop it in the move to this version.
+- `ProgramName.parse` also refuses a `/`, a NUL, and `.` or `..` alone.
+  A program is named, never located: `/bin/sh` and `../../x` parsed,
+  and an executor runs a name holding `/` as that file. Breaking: a name
+  that parsed before may now be null.
+- `ListsInstalledPrograms.installedPrograms()`: the programs a
+  `RunsPrograms` on this machine would find by name, so loop_launcher
+  can check a trajectory's rules against the machine before it starts.
+  Wire: `encodeProgramNames` writes a sorted list of names, so one set
+  always encodes to the same bytes; `decodeProgramNames` refuses a
+  non-list, an invalid name or a duplicate.
 
 ## 0.12.0
 

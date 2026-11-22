@@ -43,6 +43,15 @@ abstract interface class RunsPrograms implements CarriesOutActions {
   });
 }
 
+/// Says which programs this machine has, so loop_launcher can check a
+/// trajectory's rules against the machine before it starts. Not a
+/// [CarriesOutActions]: it is asked before anything is decided, and
+/// changes nothing.
+abstract interface class ListsInstalledPrograms {
+  /// The programs a [RunsPrograms] here would find by name.
+  Future<Set<ProgramName>> installedPrograms();
+}
+
 /// Reaches the world: carries out requests. Holds each sign-in's secret and
 /// applies it, so the airlock decides a [Request] without ever seeing one.
 ///
