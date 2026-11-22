@@ -37,8 +37,8 @@
   and an executor runs a name holding `/` as that file. Breaking: a name
   that parsed before may now be null.
 - `ListsInstalledPrograms.installedPrograms()`: the programs a
-  `RunsPrograms` on this machine would find by name, so the airlock can
-  check a trajectory's rules against the machine before it starts.
+  `RunsPrograms` on this machine would find by name, so loop_launcher
+  can check a trajectory's rules against the machine before it starts.
   Wire: `encodeProgramNames` writes a sorted list of names, so one set
   always encodes to the same bytes; `decodeProgramNames` refuses a
   non-list, an invalid name or a duplicate.

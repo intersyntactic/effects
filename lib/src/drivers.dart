@@ -43,7 +43,7 @@ abstract interface class RunsPrograms implements CarriesOutActions {
   });
 }
 
-/// Says which programs this machine has, so the airlock can check a
+/// Says which programs this machine has, so loop_launcher can check a
 /// trajectory's rules against the machine before it starts. Not a
 /// [CarriesOutActions]: it is asked before anything is decided, and
 /// changes nothing.
