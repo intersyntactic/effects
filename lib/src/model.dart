@@ -2,7 +2,7 @@ import 'program.dart';
 
 /// One of the person's model sign-ins, by name, such as `anthropic-api`.
 /// Never the secret: the driver holds that, so it reaches neither a tool
-/// nor the record.
+/// nor the logbook.
 final class ModelSignInName {
   const ModelSignInName._(this.name);
 

@@ -40,7 +40,7 @@ final class Origin {
 
 /// One of the person's sign-ins, by name, such as `some-bot`. Never the
 /// secret: the driver holds that, so it reaches neither a tool nor the
-/// record.
+/// logbook.
 final class SignIn {
   const SignIn._(this.name);
 
@@ -132,13 +132,13 @@ final class WebPath {
 
 /// Whether [name] is a credential header (`authorization`,
 /// `proxy-authorization`, `cookie`, `x-api-key`): a sign-in's secret to
-/// add, never a tool's or a renderer's to write into the record.
+/// add, never a tool's or a renderer's to write into the logbook.
 bool isCredentialHeader(String name) =>
     _credentialHeaders.contains(name.toLowerCase());
 
 /// [headers], unmodifiable, or an [ArgumentError] when one of them is
 /// [isCredentialHeader]: that is a sign-in's secret to add, so it must
-/// never be something a tool wrote and the record kept.
+/// never be something a tool wrote and the logbook kept.
 Map<String, String> validatedHeaders(Map<String, String> headers) {
   for (final name in headers.keys) {
     if (isCredentialHeader(name)) {
@@ -187,7 +187,7 @@ final class Request {
   final Map<String, String> headers;
 
   /// What reaches the destination. [WebResponse] keeps no copy of it,
-  /// since the request itself is already in the record.
+  /// since the request itself is already in the logbook.
   final String? body;
 
   /// What of the response's body comes back in [WebResponse.body].
@@ -222,7 +222,7 @@ final class BytesBody extends ResponseBody {
 
 /// Where a followed redirect ended up: an http(s) address with no query,
 /// fragment or credentials, since a pre-authenticated download address
-/// carries its token in the query and the record must never hold it.
+/// carries its token in the query and the logbook must never hold it.
 final class RedirectedTo {
   const RedirectedTo._(this.value);
 
