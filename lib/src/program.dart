@@ -2,14 +2,24 @@ import 'model.dart';
 import 'outcome.dart';
 import 'relative_path.dart';
 
-/// A program this machine can start, by name, such as `git`.
+/// A program this machine can start, by name, such as `git`: named, never
+/// located, so the machine's driver decides which file that name runs.
 final class ProgramName {
   const ProgramName._(this.value);
 
-  /// [raw] as a program's name, or null when it is blank or holds
-  /// whitespace: `git status` is `git` with an argument.
+  /// [raw] as a program's name, or null when it is blank, holds
+  /// whitespace (`git status` is `git` with an argument) or a NUL, holds a
+  /// `/` (`/bin/sh`, `../../x` would be a path, which an executor runs as
+  /// that file), or is `.` or `..`.
   static ProgramName? parse(String raw) =>
-      raw.isEmpty || raw.contains(RegExp(r'\s')) ? null : ProgramName._(raw);
+      raw.isEmpty ||
+          raw == '.' ||
+          raw == '..' ||
+          raw.contains('/') ||
+          raw.contains('\u0000') ||
+          raw.contains(RegExp(r'\s'))
+      ? null
+      : ProgramName._(raw);
 
   final String value;
 

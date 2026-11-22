@@ -47,6 +47,27 @@ void main() {
     test('refuses whitespace', () {
       expect(() => decodeProgramName('git status'), throwsFormatException);
     });
+
+    test('refuses a path, a dot name or a NUL: a program is named', () {
+      for (final raw in [
+        '/bin/sh',
+        '../../x',
+        './gradlew',
+        'bin/git',
+        '.',
+        '..',
+        'git\u0000',
+        '',
+      ]) {
+        expect(ProgramName.parse(raw), isNull, reason: raw);
+      }
+    });
+
+    test('accepts names with dots and dashes inside', () {
+      for (final raw in ['python3.12', 'git-lfs', '.hidden', 'a..b']) {
+        expect(ProgramName.parse(raw)?.value, raw);
+      }
+    });
   });
 
   group('Args', () {
