@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.0
 
 - `WebPath.parse` returns null unless the path is exactly what gets sent:
   parsing it after an origin must leave its path and query byte for byte
