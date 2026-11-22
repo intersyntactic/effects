@@ -64,7 +64,9 @@ abstract interface class ListsInstalledPrograms {
 ///
 /// Which redirects it follows is the driver's, and it never sends a
 /// sign-in's secret across to another origin; every hop it followed is
-/// named, in order, in [WebResponse.redirects].
+/// named, in order, in [WebResponse.redirects]. A hop on the request's own
+/// origin that leaves its [Request.grantedPathPrefix] is [Refused], never
+/// followed.
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
   Future<Outcome<WebResponse>> carryOutWebRequest(Request request);
 }

@@ -277,7 +277,16 @@ final class Request {
     Map<String, String> headers = const {},
     this.body,
     this.keep = BodyToKeep.none,
-  }) : headers = validatedHeaders(headers);
+    this.grantedPathPrefix,
+  }) : headers = validatedHeaders(headers) {
+    if (grantedPathPrefix case final prefix? when !prefix.covers(path)) {
+      throw ArgumentError.value(
+        path.value,
+        'path',
+        'is not under the granted prefix $prefix',
+      );
+    }
+  }
 
   final Origin origin;
   final Method method;
@@ -291,6 +300,12 @@ final class Request {
 
   /// What of the response's body comes back in [WebResponse.body].
   final BodyToKeep keep;
+
+  /// The path prefix on [origin] this request was granted under, which
+  /// covers [path]. A redirect that stays on [origin] must stay under it
+  /// too; one to another origin is the driver's to allow as before. Null
+  /// when the grant bounds no path.
+  final PathPrefix? grantedPathPrefix;
 }
 
 /// A response's body, as its [Request.keep] asked.
