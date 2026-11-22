@@ -39,6 +39,9 @@
 - `ListsInstalledPrograms.installedPrograms()`: the programs a
   `RunsPrograms` on this machine would find by name, so the airlock can
   check a trajectory's rules against the machine before it starts.
+  Wire: `encodeProgramNames` writes a sorted list of names, so one set
+  always encodes to the same bytes; `decodeProgramNames` refuses a
+  non-list, an invalid name or a duplicate.
 
 ## 0.12.0
 

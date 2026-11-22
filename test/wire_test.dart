@@ -63,6 +63,40 @@ void main() {
       }
     });
 
+    test('a set encodes sorted and round-trips', () {
+      final names = {
+        for (final raw in ['git', 'dart', 'python3.12'])
+          ProgramName.parse(raw)!,
+      };
+      expect(encodeProgramNames(names), ['dart', 'git', 'python3.12']);
+      expect(
+        decodeProgramNames(jsonDecode(jsonEncode(encodeProgramNames(names)))),
+        names,
+      );
+      expect(encodeProgramNames({}), isEmpty);
+      expect(decodeProgramNames(<Object?>[]), isEmpty);
+    });
+
+    test('a set refuses a non-list, a bad name or a duplicate, naming it', () {
+      Matcher naming(String text) => throwsA(
+        isA<FormatException>().having(
+          (e) => e.message,
+          'message',
+          contains(text),
+        ),
+      );
+      expect(() => decodeProgramNames('git'), naming('programs: not a list'));
+      expect(() => decodeProgramNames(['git', 3]), naming('programs[1]'));
+      expect(
+        () => decodeProgramNames(['git', '/bin/sh']),
+        naming('programs[1]'),
+      );
+      expect(
+        () => decodeProgramNames(['git', 'dart', 'git']),
+        naming('programs[2]: git is listed twice'),
+      );
+    });
+
     test('accepts names with dots and dashes inside', () {
       for (final raw in ['python3.12', 'git-lfs', '.hidden', 'a..b']) {
         expect(ProgramName.parse(raw)?.value, raw);

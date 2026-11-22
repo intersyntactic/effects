@@ -76,6 +76,28 @@ ProgramName decodeProgramName(Object? json, [String field = 'program']) {
       (throw FormatException('$field: not a program name ($raw)'));
 }
 
+/// [names] as a sorted list, so one set always encodes to the same bytes.
+Object? encodeProgramNames(Set<ProgramName> names) =>
+    [for (final name in names) name.value]..sort();
+
+/// A list of program names read back as a set, or a [FormatException]
+/// naming [field] for a non-list, an invalid name or a duplicate, which
+/// only a broken sender writes.
+Set<ProgramName> decodeProgramNames(Object? json, [String field = 'programs']) {
+  final raw = switch (json) {
+    final List<Object?> list => list,
+    _ => throw FormatException('$field: not a list'),
+  };
+  final names = <ProgramName>{};
+  for (final (i, item) in raw.indexed) {
+    final name = decodeProgramName(item, '$field[$i]');
+    if (!names.add(name)) {
+      throw FormatException('$field[$i]: $name is listed twice');
+    }
+  }
+  return names;
+}
+
 // Args
 
 Object? encodeArgs(Args args) => {
