@@ -70,10 +70,10 @@
   followed, in order; empty when it followed none. Each `RedirectedTo`
   holds an http(s) address with its query, fragment and credentials
   dropped, so the token in a pre-authenticated download address never
-  reaches the record. `RedirectedTo.of` drops
+  reaches the logbook. `RedirectedTo.of` drops
   those parts; `parse` refuses a recorded address that has any of them.
 - The wire is additive: `keep`, `body` and `redirects` are written
-  only when set, so every existing record decodes as before. Bytes go
+  only when set, so every existing logbook entry decodes as before. Bytes go
   as base64.
 - `ModelAndSignIn`: a `ModelName` and the `ModelSignInName` it is called
   under, such as a starting model. Wire: `{"signIn": ..., "model": ...}`
@@ -173,7 +173,7 @@
   prompt is a separate CLI argument, not part of one request body) that
   a single `request` string had nowhere for it. `AsksTheModel`'s doc is
   now also a contract: when `request` itself names a model, it must be
-  `model`, or the driver refuses without calling, so the record can
+  `model`, or the driver refuses without calling, so the logbook can
   never show one model decided and another called (airlock-api-04).
 
 ## 0.6.0
@@ -278,9 +278,9 @@
 
 - `Sent` gains `refusedBecause`, the destination's own reason for a
   non-2xx reply (a Teams 400 body, an AADSTS code), so a failure's why
-  reaches the record instead of staying in the driver's own logs.
+  reaches the logbook instead of staying in the driver's own logs.
 - Reworded `Request.body` and `Sent`'s doc comments: no body is kept
-  because what a reader needs back is already elsewhere in the record,
+  because what a reader needs back is already elsewhere in the logbook,
   not because of a by-reference ruling (there is none).
 
 ## 0.1.0

@@ -69,7 +69,7 @@ abstract interface class CarriesOutWebRequests implements CarriesOutActions {
 ///
 /// When [request] itself names a model, that name must be [model], or the
 /// driver refuses without calling: the airlock decided on [model], so the
-/// record must not show one thing decided and another called.
+/// logbook must not show one thing decided and another called.
 abstract interface class AsksTheModel implements CarriesOutActions {
   Future<Outcome<ModelReply>> askTheModel(
     ModelSignInName signIn,
