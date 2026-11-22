@@ -737,6 +737,46 @@ void main() {
       expect(encodeRequest(Request(origin)), isNot(contains('keep')));
     });
 
+    test('round-trips the granted path prefix, written only when set', () {
+      final request = Request(
+        origin,
+        path: WebPath.parse('/v1.0/drives/d/items/i/content')!,
+        grantedPathPrefix: PathPrefix.parse('/v1.0/drives/d/'),
+      );
+      final decoded = decodeRequest(
+        jsonDecode(jsonEncode(encodeRequest(request))),
+      );
+      expect(decoded.grantedPathPrefix, request.grantedPathPrefix);
+      expect(
+        encodeRequest(Request(origin)),
+        isNot(contains('grantedPathPrefix')),
+      );
+    });
+
+    test('refuses a granted prefix that does not cover the path', () {
+      expect(
+        () => decodeRequest({
+          'origin': 'https://api.example.com',
+          'path': '/v1.0/drives/other/x',
+          'grantedPathPrefix': '/v1.0/drives/d/',
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('request.path: not under request.grantedPathPrefix'),
+          ),
+        ),
+      );
+      expect(
+        () => decodeRequest({
+          'origin': 'https://api.example.com',
+          'grantedPathPrefix': '/no-slash',
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('refuses a credential header, naming the field', () {
       expect(
         () => decodeRequest({

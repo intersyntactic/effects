@@ -133,6 +133,25 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test('carries the granted path prefix, which must cover its path', () {
+      final drive = PathPrefix.parse('/v1.0/drives/d/')!;
+      final request = Request(
+        origin,
+        path: WebPath.parse('/v1.0/drives/d/items/i/content')!,
+        grantedPathPrefix: drive,
+      );
+      expect(request.grantedPathPrefix, drive);
+      expect(Request(origin).grantedPathPrefix, isNull);
+      expect(
+        () => Request(
+          origin,
+          path: WebPath.parse('/v1.0/drives/other/items')!,
+          grantedPathPrefix: drive,
+        ),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('PathPrefix', () {

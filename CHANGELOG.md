@@ -27,6 +27,13 @@
   trajectory's reply endpoint or a fetch grant's bound.
   `covers(Origin, WebPath)`. Wire: `{"origin", "pathPrefix"}` via
   `encodeAddressPrefix`/`decodeAddressPrefix`.
+- `Request.grantedPathPrefix`: the `PathPrefix` on the request's origin
+  it was granted under, which must cover its path (the constructor
+  throws `ArgumentError`, decoding a `FormatException`, otherwise).
+  `CarriesOutWebRequests` says a redirect hop on the request's own
+  origin that leaves it is `Refused`; a hop to another origin is the
+  driver's to allow as before. Null bounds no path. Wire: written only
+  when set, so every existing request decodes as before.
 - `BuildsRequestsAnsweringEvents` is removed. The airlock no longer
   builds replies: a turn's final text goes to the conversation's reply
   tool, which builds and proposes its own requests. Breaking for its

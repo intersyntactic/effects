@@ -534,18 +534,30 @@ Object? encodeRequest(Request request) => {
   'headers': encodeHeaders(request.headers),
   'body': request.body,
   if (request.keep != BodyToKeep.none) 'keep': encodeBodyToKeep(request.keep),
+  if (request.grantedPathPrefix case final prefix?)
+    'grantedPathPrefix': encodePathPrefix(prefix),
 };
 
 Request decodeRequest(Object? json, [String field = 'request']) {
   final map = _object(json, field);
+  final path = map.containsKey('path')
+      ? decodeWebPath(map['path'], '$field.path')
+      : WebPath.root;
+  final granted = map.containsKey('grantedPathPrefix')
+      ? decodePathPrefix(map['grantedPathPrefix'], '$field.grantedPathPrefix')
+      : null;
+  if (granted != null && !granted.covers(path)) {
+    throw FormatException(
+      '$field.path: not under $field.grantedPathPrefix ($path, $granted)',
+    );
+  }
   return Request(
     decodeOrigin(map['origin'], '$field.origin'),
     method: map.containsKey('method')
         ? decodeMethod(map['method'], '$field.method')
         : Method.get,
-    path: map.containsKey('path')
-        ? decodeWebPath(map['path'], '$field.path')
-        : WebPath.root,
+    path: path,
+    grantedPathPrefix: granted,
     signIn: map['signIn'] == null
         ? null
         : decodeSignIn(map['signIn'], '$field.signIn'),
