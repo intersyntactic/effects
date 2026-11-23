@@ -52,23 +52,24 @@ abstract interface class ListsInstalledPrograms {
   Future<Set<ProgramName>> installedPrograms();
 }
 
-/// Reaches the world: carries out requests. Holds each sign-in's secret and
-/// applies it, so the airlock decides a [Request] without ever seeing one.
+/// Reaches the world: carries out granted requests. Holds each sign-in's
+/// secret and applies it, so the airlock decides a [ProposedRequest]
+/// without ever seeing one.
 ///
-/// A 2xx response's body comes back as [Request.keep] asks: [TextBody] for
-/// text, [BytesBody] for bytes, [NoBody] otherwise. A text body that isn't
-/// UTF-8 is [Refused], never decoded loosely, and a [TextBody] keeps a
-/// leading byte order mark (U+FEFF), as a file read does. How large a body
-/// it keeps is the driver's to decide: one over that is [Refused], since
-/// every byte kept is recorded.
+/// A 2xx response's body comes back as [ProposedRequest.keep] asks:
+/// [TextBody] for text, [BytesBody] for bytes, [NoBody] otherwise. A text
+/// body that isn't UTF-8 is [Refused], never decoded loosely, and a
+/// [TextBody] keeps a leading byte order mark (U+FEFF), as a file read
+/// does. How large a body it keeps is the driver's to decide: one over that
+/// is [Refused], since every byte kept is recorded.
 ///
 /// Which redirects it follows is the driver's, and it never sends a
 /// sign-in's secret across to another origin; every hop it followed is
 /// named, in order, in [WebResponse.redirects]. A hop on the request's own
-/// origin that leaves its [Request.grantedPathPrefix] is [Refused], never
-/// followed.
+/// origin that leaves its [GrantedRequest.grantedPathPrefix] is [Refused],
+/// never followed.
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
-  Future<Outcome<WebResponse>> carryOutWebRequest(Request request);
+  Future<Outcome<WebResponse>> carryOutWebRequest(GrantedRequest request);
 }
 
 /// Calls the model. Holds every model sign-in: the model is outside the

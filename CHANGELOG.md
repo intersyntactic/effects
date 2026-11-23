@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- `Request` is split in two, and the name is retired. `ProposedRequest`
+  is what a tool or the model proposes: origin, method, path, sign-in,
+  headers, body and what to keep, and no grant. `GrantedRequest` is one
+  the airlock granted, made only by
+  `GrantedRequest.under(proposed, grantedPathPrefix)`, which throws when
+  the prefix doesn't cover the path; `grantedPathPrefix` is never null,
+  and `/` grants the whole site. `CarriesOutWebRequests` takes a
+  `GrantedRequest`. A nullable `Request.grantedPathPrefix` meant both
+  "the grant bounds no path" and "nobody filled it in", so the airlock
+  could hand the driver requests with it empty and the redirect bound
+  never applied. Wire: `encodeProposedRequest`/`decodeProposedRequest`
+  (a proposal carrying `grantedPathPrefix` is refused) and
+  `encodeGrantedRequest`/`decodeGrantedRequest` (the proposed fields plus
+  a required `grantedPathPrefix` covering the path). Breaking.
+
 ## 0.13.0
 
 - `WebPath.parse` returns null unless the path is exactly what gets sent:

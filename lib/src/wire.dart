@@ -524,9 +524,11 @@ Map<String, String> decodeHeaders(Object? json, [String field = 'headers']) {
   return Map.unmodifiable(headers);
 }
 
-// Request
+// ProposedRequest
 
-Object? encodeRequest(Request request) => {
+Object? encodeProposedRequest(ProposedRequest request) => _proposedMap(request);
+
+Map<String, Object?> _proposedMap(ProposedRequest request) => {
   'origin': encodeOrigin(request.origin),
   'method': encodeMethod(request.method),
   'path': encodeWebPath(request.path),
@@ -534,46 +536,77 @@ Object? encodeRequest(Request request) => {
   'headers': encodeHeaders(request.headers),
   'body': request.body,
   if (request.keep != BodyToKeep.none) 'keep': encodeBodyToKeep(request.keep),
-  if (request.grantedPathPrefix case final prefix?)
-    'grantedPathPrefix': encodePathPrefix(prefix),
 };
 
-Request decodeRequest(Object? json, [String field = 'request']) {
+/// A proposal read back. One that names a `grantedPathPrefix` is refused:
+/// only the airlock grants, so a proposal claiming a grant is forged.
+ProposedRequest decodeProposedRequest(
+  Object? json, [
+  String field = 'request',
+]) {
   final map = _object(json, field);
-  final path = map.containsKey('path')
-      ? decodeWebPath(map['path'], '$field.path')
-      : WebPath.root;
-  final granted = map.containsKey('grantedPathPrefix')
-      ? decodePathPrefix(map['grantedPathPrefix'], '$field.grantedPathPrefix')
-      : null;
-  if (granted != null && !granted.covers(path)) {
+  if (map.containsKey(_grantedPathPrefix)) {
     throw FormatException(
-      '$field.path: not under $field.grantedPathPrefix ($path, $granted)',
+      '$field.$_grantedPathPrefix: a proposal carries no grant',
     );
   }
-  return Request(
-    decodeOrigin(map['origin'], '$field.origin'),
-    method: map.containsKey('method')
-        ? decodeMethod(map['method'], '$field.method')
-        : Method.get,
-    path: path,
-    grantedPathPrefix: granted,
-    signIn: map['signIn'] == null
-        ? null
-        : decodeSignIn(map['signIn'], '$field.signIn'),
-    headers: map.containsKey('headers')
-        ? decodeHeaders(map['headers'], '$field.headers')
-        : const {},
-    body: switch (map['body']) {
-      null => null,
-      final String body => body,
-      _ => throw FormatException('$field.body: not a string'),
-    },
-    keep: map.containsKey('keep')
-        ? decodeBodyToKeep(map['keep'], '$field.keep')
-        : BodyToKeep.none,
-  );
+  return _proposedFrom(map, field);
 }
+
+// GrantedRequest
+
+Object? encodeGrantedRequest(GrantedRequest request) => {
+  ..._proposedMap(request.proposed),
+  _grantedPathPrefix: encodePathPrefix(request.grantedPathPrefix),
+};
+
+/// A granted request read back, as a driver's service receives it: the
+/// proposed fields and a required `grantedPathPrefix` covering the path.
+GrantedRequest decodeGrantedRequest(Object? json, [String field = 'request']) {
+  final map = _object(json, field);
+  if (!map.containsKey(_grantedPathPrefix)) {
+    throw FormatException('$field.$_grantedPathPrefix: missing');
+  }
+  final prefix = decodePathPrefix(
+    map[_grantedPathPrefix],
+    '$field.$_grantedPathPrefix',
+  );
+  final proposed = _proposedFrom(map, field);
+  if (!prefix.covers(proposed.path)) {
+    throw FormatException(
+      '$field.path: not under $field.$_grantedPathPrefix '
+      '(${proposed.path}, $prefix)',
+    );
+  }
+  return GrantedRequest.under(proposed, prefix);
+}
+
+const _grantedPathPrefix = 'grantedPathPrefix';
+
+ProposedRequest _proposedFrom(Map<String, Object?> map, String field) =>
+    ProposedRequest(
+      decodeOrigin(map['origin'], '$field.origin'),
+      method: map.containsKey('method')
+          ? decodeMethod(map['method'], '$field.method')
+          : Method.get,
+      path: map.containsKey('path')
+          ? decodeWebPath(map['path'], '$field.path')
+          : WebPath.root,
+      signIn: map['signIn'] == null
+          ? null
+          : decodeSignIn(map['signIn'], '$field.signIn'),
+      headers: map.containsKey('headers')
+          ? decodeHeaders(map['headers'], '$field.headers')
+          : const {},
+      body: switch (map['body']) {
+        null => null,
+        final String body => body,
+        _ => throw FormatException('$field.body: not a string'),
+      },
+      keep: map.containsKey('keep')
+          ? decodeBodyToKeep(map['keep'], '$field.keep')
+          : BodyToKeep.none,
+    );
 
 // BodyToKeep
 
