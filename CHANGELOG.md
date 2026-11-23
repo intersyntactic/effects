@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- `Origin`, `WebPath`, `PathPrefix` and `AddressPrefix`, with their
+  `encodeX` / `decodeX` pairs, now live in `is_web_address_vocabulary`,
+  which this package depends on and re-exports. They are the same types,
+  so nothing that imports them from here changes; a package that needs
+  only web addresses can depend on the vocabulary alone.
+
 ## 0.14.1
 
 - `FileRequest`: what the airlock asks the file driver to do, as

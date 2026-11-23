@@ -8,6 +8,10 @@
 /// airlock.
 library;
 
+// Re-exported so Origin, WebPath, PathPrefix and AddressPrefix stay one type
+// whichever package a caller imports them from.
+export 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
+
 export 'src/bot_pool.dart';
 export 'src/drivers.dart';
 export 'src/file.dart';
