@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.2
 
 - `Origin`, `WebPath`, `PathPrefix` and `AddressPrefix`, with their
   `encodeX` / `decodeX` pairs, now live in `is_web_address_vocabulary`,
