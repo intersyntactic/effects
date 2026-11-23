@@ -66,6 +66,38 @@ FileText decodeFileText(Object? json, [String field = 'file']) {
   );
 }
 
+// FileRequest
+
+Object? encodeFileRequest(FileRequest request) => switch (request) {
+  ReadFileRequest(:final path) => {
+    'kind': 'read',
+    'path': encodeRelativePath(path),
+  },
+  ReadFileBytesRequest(:final path) => {
+    'kind': 'readBytes',
+    'path': encodeRelativePath(path),
+  },
+  WriteFileRequest(:final file) => {
+    'kind': 'write',
+    'file': encodeFileText(file),
+  },
+};
+
+FileRequest decodeFileRequest(Object? json, [String field = 'fileRequest']) {
+  final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
+  return switch (map['kind']) {
+    'read' => ReadFileRequest(decodeRelativePath(map['path'], '$field.path')),
+    'readBytes' => ReadFileBytesRequest(
+      decodeRelativePath(map['path'], '$field.path'),
+    ),
+    'write' => WriteFileRequest(decodeFileText(map['file'], '$field.file')),
+    final other => throw FormatException(
+      '$field.kind: not "read", "readBytes" or "write" ($other)',
+    ),
+  };
+}
+
 // ProgramName
 
 Object? encodeProgramName(ProgramName name) => name.value;
