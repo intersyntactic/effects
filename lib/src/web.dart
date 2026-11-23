@@ -2,10 +2,10 @@ import 'dart:typed_data';
 
 import 'outcome.dart';
 
-/// An http(s) site a [Request] may be sent to: scheme, host and port only,
-/// with no path, query, fragment or credentials. A rule grants or denies by
-/// comparing one of these with `==`, so naming a site covers every request
-/// to it.
+/// An http(s) site a [ProposedRequest] may be sent to: scheme, host and
+/// port only, with no path, query, fragment or credentials. A rule grants
+/// or denies by comparing one of these with `==`, so naming a site covers
+/// every request to it.
 final class Origin {
   const Origin._(this.value);
 
@@ -63,7 +63,7 @@ final class SignIn {
 
 final _name = RegExp(r'^[a-z0-9][a-z0-9_-]*$');
 
-/// What a [Request] asks of its [origin].
+/// What a [ProposedRequest] asks of its origin.
 enum Method { get, post, put, patch, delete }
 
 /// A path appended to an [Origin]'s address, never able to change which
@@ -258,18 +258,20 @@ const _credentialHeaders = {
   'x-api-key',
 };
 
-/// What of a 2xx response's body a [Request] asks to keep. Every byte kept
-/// is recorded, so the airlock decides on this with the rest of the request.
+/// What of a 2xx response's body a [ProposedRequest] asks to keep. Every
+/// byte kept is recorded, so the airlock decides on this with the rest of
+/// the request.
 enum BodyToKeep { none, text, bytes }
 
-/// Something a [CarriesOutWebRequests] carries out to [origin], reaching
-/// the world.
+/// A web request as a tool or the model proposes it, to [origin]. It
+/// carries no grant: the airlock decides it, and only a [GrantedRequest]
+/// reaches a [CarriesOutWebRequests].
 ///
 /// [path] is appended to [origin]'s address. [signIn] names who it goes as;
 /// null sends under no sign-in. [headers] are [validatedHeaders]: never a
 /// credential, which is the sign-in's to add.
-final class Request {
-  Request(
+final class ProposedRequest {
+  ProposedRequest(
     this.origin, {
     this.method = Method.get,
     this.path = WebPath.root,
@@ -277,16 +279,7 @@ final class Request {
     Map<String, String> headers = const {},
     this.body,
     this.keep = BodyToKeep.none,
-    this.grantedPathPrefix,
-  }) : headers = validatedHeaders(headers) {
-    if (grantedPathPrefix case final prefix? when !prefix.covers(path)) {
-      throw ArgumentError.value(
-        path.value,
-        'path',
-        'is not under the granted prefix $prefix',
-      );
-    }
-  }
+  }) : headers = validatedHeaders(headers);
 
   final Origin origin;
   final Method method;
@@ -300,15 +293,40 @@ final class Request {
 
   /// What of the response's body comes back in [WebResponse.body].
   final BodyToKeep keep;
-
-  /// The path prefix on [origin] this request was granted under, which
-  /// covers [path]. A redirect that stays on [origin] must stay under it
-  /// too; one to another origin is the driver's to allow as before. Null
-  /// when the grant bounds no path.
-  final PathPrefix? grantedPathPrefix;
 }
 
-/// A response's body, as its [Request.keep] asked.
+/// A [ProposedRequest] the airlock granted, under [grantedPathPrefix]: what
+/// a [CarriesOutWebRequests] is given. Made only by [GrantedRequest.under].
+final class GrantedRequest {
+  const GrantedRequest._(this.proposed, this.grantedPathPrefix);
+
+  /// [proposed], granted under [grantedPathPrefix] on its origin, or an
+  /// [ArgumentError] when that prefix doesn't cover its path. `/` grants
+  /// the whole site.
+  factory GrantedRequest.under(
+    ProposedRequest proposed,
+    PathPrefix grantedPathPrefix,
+  ) {
+    if (!grantedPathPrefix.covers(proposed.path)) {
+      throw ArgumentError.value(
+        proposed.path.value,
+        'proposed.path',
+        'is not under the granted prefix $grantedPathPrefix',
+      );
+    }
+    return GrantedRequest._(proposed, grantedPathPrefix);
+  }
+
+  final ProposedRequest proposed;
+
+  /// The path prefix on the proposed origin this request was granted
+  /// under, which covers its path. A redirect that stays on that origin
+  /// must stay under it too; one to another origin is the driver's to
+  /// allow as before.
+  final PathPrefix grantedPathPrefix;
+}
+
+/// A response's body, as its [ProposedRequest.keep] asked.
 sealed class ResponseBody {
   const ResponseBody();
 }
@@ -378,11 +396,12 @@ final class RedirectedTo {
   String toString() => value.toString();
 }
 
-/// The site's response to a [Request]: [status], and either [created] (the
-/// id the destination made of it, when it made one) or [refusedBecause]
-/// (why, in the site's own words, when [status] was not 2xx).
+/// The site's response to a [GrantedRequest]: [status], and either
+/// [created] (the id the destination made of it, when it made one) or
+/// [refusedBecause] (why, in the site's own words, when [status] was not
+/// 2xx).
 ///
-/// [body] is what [Request.keep] asked for, only for a 2xx [status].
+/// [body] is what [ProposedRequest.keep] asked for, only for a 2xx [status].
 /// [redirects] are the hops the driver followed to reach the response. A
 /// refused sign-in, where nothing was sent, is [Refused], not this.
 final class WebResponse {

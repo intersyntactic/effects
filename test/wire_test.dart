@@ -691,12 +691,12 @@ void main() {
     });
   });
 
-  group('Request', () {
+  group('ProposedRequest and GrantedRequest', () {
     final origin = Origin.parse('https://api.example.com')!;
 
     test('round-trips with defaults', () {
-      final request = Request(origin);
-      final decoded = decodeRequest(encodeRequest(request));
+      final request = ProposedRequest(origin);
+      final decoded = decodeProposedRequest(encodeProposedRequest(request));
       expect(decoded.origin, origin);
       expect(decoded.method, Method.get);
       expect(decoded.path, WebPath.root);
@@ -706,7 +706,7 @@ void main() {
     });
 
     test('round-trips every field set', () {
-      final request = Request(
+      final request = ProposedRequest(
         origin,
         method: Method.post,
         path: WebPath.parse('/v3/send')!,
@@ -714,7 +714,7 @@ void main() {
         headers: const {'content-type': 'application/json'},
         body: '{}',
       );
-      final decoded = decodeRequest(encodeRequest(request));
+      final decoded = decodeProposedRequest(encodeProposedRequest(request));
       expect(decoded.origin, request.origin);
       expect(decoded.method, request.method);
       expect(decoded.path, request.path);
@@ -726,50 +726,82 @@ void main() {
 
     test('round-trips what to keep of the body', () {
       for (final keep in BodyToKeep.values) {
-        final decoded = decodeRequest(
-          encodeRequest(Request(origin, keep: keep)),
+        final decoded = decodeProposedRequest(
+          encodeProposedRequest(ProposedRequest(origin, keep: keep)),
         );
         expect(decoded.keep, keep);
       }
     });
 
     test('writes no keep when it keeps nothing, as before', () {
-      expect(encodeRequest(Request(origin)), isNot(contains('keep')));
-    });
-
-    test('round-trips the granted path prefix, written only when set', () {
-      final request = Request(
-        origin,
-        path: WebPath.parse('/v1.0/drives/d/items/i/content')!,
-        grantedPathPrefix: PathPrefix.parse('/v1.0/drives/d/'),
-      );
-      final decoded = decodeRequest(
-        jsonDecode(jsonEncode(encodeRequest(request))),
-      );
-      expect(decoded.grantedPathPrefix, request.grantedPathPrefix);
       expect(
-        encodeRequest(Request(origin)),
-        isNot(contains('grantedPathPrefix')),
+        encodeProposedRequest(ProposedRequest(origin)),
+        isNot(contains('keep')),
       );
     });
 
-    test('refuses a granted prefix that does not cover the path', () {
+    test('a proposal that claims a grant is refused, naming the key', () {
       expect(
-        () => decodeRequest({
+        () => decodeProposedRequest({
           'origin': 'https://api.example.com',
-          'path': '/v1.0/drives/other/x',
+          'path': '/v1.0/drives/d/x',
           'grantedPathPrefix': '/v1.0/drives/d/',
         }),
         throwsA(
           isA<FormatException>().having(
             (e) => e.message,
             'message',
-            contains('request.path: not under request.grantedPathPrefix'),
+            contains('request.grantedPathPrefix: a proposal carries no grant'),
           ),
         ),
       );
+    });
+
+    test('a granted request round-trips with its prefix', () {
+      final granted = GrantedRequest.under(
+        ProposedRequest(
+          origin,
+          method: Method.post,
+          path: WebPath.parse('/v1.0/drives/d/items/i/content')!,
+          signIn: SignIn.parse('some-bot'),
+          body: '{}',
+          keep: BodyToKeep.bytes,
+        ),
+        PathPrefix.parse('/v1.0/drives/d/')!,
+      );
+      final json = jsonDecode(jsonEncode(encodeGrantedRequest(granted)));
+      expect(json, containsPair('grantedPathPrefix', '/v1.0/drives/d/'));
+      final decoded = decodeGrantedRequest(json);
+      expect(decoded.grantedPathPrefix, granted.grantedPathPrefix);
+      expect(decoded.proposed.path, granted.proposed.path);
+      expect(decoded.proposed.method, Method.post);
+      expect(decoded.proposed.signIn, granted.proposed.signIn);
+      expect(decoded.proposed.body, '{}');
+      expect(decoded.proposed.keep, BodyToKeep.bytes);
+    });
+
+    test('a granted request needs a prefix that covers its path', () {
+      Matcher naming(String text) => throwsA(
+        isA<FormatException>().having(
+          (e) => e.message,
+          'message',
+          contains(text),
+        ),
+      );
       expect(
-        () => decodeRequest({
+        () => decodeGrantedRequest({'origin': 'https://api.example.com'}),
+        naming('request.grantedPathPrefix: missing'),
+      );
+      expect(
+        () => decodeGrantedRequest({
+          'origin': 'https://api.example.com',
+          'path': '/v1.0/drives/other/x',
+          'grantedPathPrefix': '/v1.0/drives/d/',
+        }),
+        naming('request.path: not under request.grantedPathPrefix'),
+      );
+      expect(
+        () => decodeGrantedRequest({
           'origin': 'https://api.example.com',
           'grantedPathPrefix': '/no-slash',
         }),
@@ -779,7 +811,7 @@ void main() {
 
     test('refuses a credential header, naming the field', () {
       expect(
-        () => decodeRequest({
+        () => decodeProposedRequest({
           'origin': 'https://api.example.com',
           'headers': {'authorization': 'secret'},
         }),

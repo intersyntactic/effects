@@ -120,36 +120,50 @@ void main() {
     }
   });
 
-  group('Request', () {
+  group('ProposedRequest', () {
     final origin = Origin.parse('https://api.example.com')!;
 
     test('defaults path to WebPath.root', () {
-      expect(Request(origin).path, WebPath.root);
+      expect(ProposedRequest(origin).path, WebPath.root);
     });
 
     test('refuses a header carrying a credential', () {
       expect(
-        () => Request(origin, headers: const {'authorization': 'x'}),
+        () => ProposedRequest(origin, headers: const {'authorization': 'x'}),
+        throwsArgumentError,
+      );
+    });
+  });
+
+  group('GrantedRequest', () {
+    final origin = Origin.parse('https://api.example.com')!;
+    final drive = PathPrefix.parse('/v1.0/drives/d/')!;
+
+    test('grants a proposal under a prefix that covers its path', () {
+      final proposed = ProposedRequest(
+        origin,
+        path: WebPath.parse('/v1.0/drives/d/items/i/content')!,
+      );
+      final granted = GrantedRequest.under(proposed, drive);
+      expect(granted.proposed, same(proposed));
+      expect(granted.grantedPathPrefix, drive);
+    });
+
+    test('refuses a prefix that does not cover the path', () {
+      expect(
+        () => GrantedRequest.under(
+          ProposedRequest(origin, path: WebPath.parse('/v1.0/drives/x/a')!),
+          drive,
+        ),
         throwsArgumentError,
       );
     });
 
-    test('carries the granted path prefix, which must cover its path', () {
-      final drive = PathPrefix.parse('/v1.0/drives/d/')!;
-      final request = Request(
-        origin,
-        path: WebPath.parse('/v1.0/drives/d/items/i/content')!,
-        grantedPathPrefix: drive,
-      );
-      expect(request.grantedPathPrefix, drive);
-      expect(Request(origin).grantedPathPrefix, isNull);
+    test('/ grants the whole site, root included', () {
+      final site = PathPrefix.parse('/')!;
       expect(
-        () => Request(
-          origin,
-          path: WebPath.parse('/v1.0/drives/other/items')!,
-          grantedPathPrefix: drive,
-        ),
-        throwsArgumentError,
+        GrantedRequest.under(ProposedRequest(origin), site).grantedPathPrefix,
+        site,
       );
     });
   });

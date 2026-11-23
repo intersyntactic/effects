@@ -21,9 +21,11 @@ the decision and what follows stay with `is_airlock_api`.
 - Reaching the world: an `Origin` (scheme, host and port only), a
   `WebPath` (made only by `parse`: a leading `/`, no authority, no `..`
   or `@`, so a path can never name somewhere other than where it was
-  decided to go) and an optional `SignIn` by name, with a `Request` — the
-  web driver's input: method, path, headers (`validatedHeaders`, which
-  refuses a credential) and an optional body — giving a `WebResponse`
+  decided to go) and an optional `SignIn` by name, with a
+  `ProposedRequest` (method, path, headers by `validatedHeaders`, which
+  refuses a credential, and an optional body), which the airlock decides.
+  A `GrantedRequest` is one it granted under a `PathPrefix`: the web
+  driver's input, giving a `WebResponse`
   (`status`, and either `created` or, for a non-2xx reply,
   `refusedBecause`).
 - Calling the model: a `ModelSignInName` by name (never the secret) and a
