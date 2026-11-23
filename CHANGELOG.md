@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.0
 
 - `Request` is split in two, and the name is retired. `ProposedRequest`
   is what a tool or the model proposes: origin, method, path, sign-in,
