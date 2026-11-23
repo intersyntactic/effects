@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.1
 
 - `FileRequest`: what the airlock asks the file driver to do, as
   `ReadFileRequest(path)`, `ReadFileBytesRequest(path)` or
