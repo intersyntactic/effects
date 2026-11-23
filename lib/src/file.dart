@@ -11,6 +11,30 @@ final class FileText {
   final String text;
 }
 
+/// What the airlock asks the file driver to do: one case for each of
+/// `ReadsAndWritesFiles`'s methods.
+sealed class FileRequest {
+  const FileRequest();
+}
+
+final class ReadFileRequest extends FileRequest {
+  const ReadFileRequest(this.path);
+
+  final RelativePath path;
+}
+
+final class ReadFileBytesRequest extends FileRequest {
+  const ReadFileBytesRequest(this.path);
+
+  final RelativePath path;
+}
+
+final class WriteFileRequest extends FileRequest {
+  const WriteFileRequest(this.file);
+
+  final FileText file;
+}
+
 /// What a text read found.
 sealed class ReadResult {
   const ReadResult();

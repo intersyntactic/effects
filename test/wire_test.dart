@@ -232,6 +232,69 @@ void main() {
     });
   });
 
+  group('FileRequest', () {
+    test('each kind is the JSON file_driver already sends', () {
+      expect(encodeFileRequest(ReadFileRequest(RelativePath('a.txt'))), {
+        'kind': 'read',
+        'path': 'a.txt',
+      });
+      expect(encodeFileRequest(ReadFileBytesRequest(RelativePath('b.docx'))), {
+        'kind': 'readBytes',
+        'path': 'b.docx',
+      });
+      expect(
+        encodeFileRequest(WriteFileRequest(FileText(RelativePath('c'), 'hi'))),
+        {
+          'kind': 'write',
+          'file': {'path': 'c', 'text': 'hi'},
+        },
+      );
+    });
+
+    test('round-trips each kind', () {
+      final read = decodeFileRequest({'kind': 'read', 'path': 'a.txt'});
+      expect((read as ReadFileRequest).path, RelativePath('a.txt'));
+
+      final bytes = decodeFileRequest({'kind': 'readBytes', 'path': 'b'});
+      expect((bytes as ReadFileBytesRequest).path, RelativePath('b'));
+
+      final write = decodeFileRequest(
+        encodeFileRequest(WriteFileRequest(FileText(RelativePath('c'), 'hi'))),
+      );
+      expect((write as WriteFileRequest).file.path, RelativePath('c'));
+      expect(write.file.text, 'hi');
+    });
+
+    test('refuses an unknown kind, naming it', () {
+      expect(
+        () => decodeFileRequest({'kind': 'delete', 'path': 'a'}),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('fileRequest.kind'),
+          ),
+        ),
+      );
+    });
+
+    test('refuses a write with no text, naming the field', () {
+      expect(
+        () => decodeFileRequest({
+          'kind': 'write',
+          'file': {'path': 'c'},
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('fileRequest.file.text'),
+          ),
+        ),
+      );
+    });
+  });
+
   group('Progress', () {
     test('round-trips ReplyArriving', () {
       final decoded = decodeProgress(

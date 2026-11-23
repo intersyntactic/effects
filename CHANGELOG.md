@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- `FileRequest`: what the airlock asks the file driver to do, as
+  `ReadFileRequest(path)`, `ReadFileBytesRequest(path)` or
+  `WriteFileRequest(file)`, with `encodeFileRequest` and
+  `decodeFileRequest`. The JSON is file_driver's own
+  (`{"kind": "read" | "readBytes", "path"}` or
+  `{"kind": "write", "file"}`), so an airlock can hold its own file client
+  without depending on file_driver.
+
 ## 0.14.0
 
 - `Request` is split in two, and the name is retired. `ProposedRequest`
