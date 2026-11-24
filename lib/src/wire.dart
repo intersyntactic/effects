@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart';
 import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 
 import 'bot_pool.dart';
@@ -338,16 +339,6 @@ Method decodeMethod(Object? json, [String field = 'method']) {
   final raw = _string(json, field);
   return Method.values.where((m) => m.name == raw).firstOrNull ??
       (throw FormatException('$field: not a method ($raw)'));
-}
-
-// SignIn
-
-Object? encodeSignIn(SignIn signIn) => signIn.name;
-
-SignIn decodeSignIn(Object? json, [String field = 'signIn']) {
-  final raw = _string(json, field);
-  return SignIn.parse(raw) ??
-      (throw FormatException('$field: not a sign-in ($raw)'));
 }
 
 // ModelSignInName

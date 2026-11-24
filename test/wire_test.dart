@@ -519,17 +519,6 @@ void main() {
     });
   });
 
-  group('SignIn', () {
-    test('round-trips', () {
-      final signIn = SignIn.parse('some-bot')!;
-      expect(decodeSignIn(encodeSignIn(signIn)), signIn);
-    });
-
-    test('refuses an invalid name', () {
-      expect(() => decodeSignIn('Not Valid'), throwsFormatException);
-    });
-  });
-
   group('ModelSignInName', () {
     test('round-trips', () {
       final signIn = ModelSignInName.parse('anthropic-api')!;

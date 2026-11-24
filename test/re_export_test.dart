@@ -1,9 +1,20 @@
 import 'package:is_effects/is_effects.dart' as effects;
+import 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart' as sign_in;
 import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart'
     as vocabulary;
 import 'package:test/test.dart';
 
 void main() {
+  test('SignIn is the sign-in vocabulary\'s own, not a copy', () {
+    expect(effects.SignIn, same(sign_in.SignIn));
+    expect(
+      effects.decodeSignIn(
+        sign_in.encodeSignIn(sign_in.SignIn.parse('a-bot')!),
+      ),
+      sign_in.SignIn.parse('a-bot'),
+    );
+  });
+
   test('the web address types are the vocabulary\'s own, not copies', () {
     expect(effects.Origin, same(vocabulary.Origin));
     expect(effects.WebPath, same(vocabulary.WebPath));

@@ -8,8 +8,9 @@
 /// airlock.
 library;
 
-// Re-exported so Origin, WebPath, PathPrefix and AddressPrefix stay one type
-// whichever package a caller imports them from.
+// Re-exported so SignIn, Origin, WebPath, PathPrefix and AddressPrefix stay
+// one type whichever package a caller imports them from.
+export 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart';
 export 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 
 export 'src/bot_pool.dart';
