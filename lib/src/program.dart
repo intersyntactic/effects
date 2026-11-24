@@ -1,4 +1,5 @@
-import 'model.dart';
+import 'package:is_model_vocabulary/is_model_vocabulary.dart' show ModelReply;
+
 import 'outcome.dart';
 import 'relative_path.dart';
 
@@ -97,8 +98,8 @@ typedef Report = void Function(Progress progress);
 
 /// What a program did once it started: it [Exited], or it was [Killed].
 ///
-/// One that never started is [Refused], with its own reason, so there is no
-/// refused case here.
+/// One that never started is [NothingRan], with its own reason, so there is
+/// no such case here.
 sealed class ExecResult {
   const ExecResult({required this.stdout, required this.stderr});
 

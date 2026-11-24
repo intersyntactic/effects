@@ -3,13 +3,14 @@ description: >-
   The shared vocabulary of intersyntactic's actions: what reading, writing,
   starting a program and reaching the world take and give back, and the
   drivers that carry them out.
-version: 0.14.4
+version: 0.15.0
 repository: https://github.com/intersyntactic/effects
 
 environment:
   sdk: ^3.13.0
 
 dependencies:
+  is_model_vocabulary: ^0.2.0
   is_path_confinement: ^0.1.0
   is_sign_in_vocabulary: ^0.1.0
   is_web_address_vocabulary: ^0.1.1

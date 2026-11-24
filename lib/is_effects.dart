@@ -8,8 +8,30 @@
 /// airlock.
 library;
 
-// Re-exported so SignIn, Origin, WebPath, PathPrefix and AddressPrefix stay
-// one type whichever package a caller imports them from.
+// Re-exported so SignIn, Origin, WebPath, PathPrefix, AddressPrefix and the
+// model's replies stay one type whichever package a caller imports them
+// from.
+//
+// A reply is recorded as Ran even when cut off or proposing tools: tokens
+// were spent and a reply came back. Only the reply and what a proposal of
+// tools carries come through here; the turns and the request are imported
+// from is_model_vocabulary itself, since airlock_api has a ModelRequest of
+// its own.
+export 'package:is_model_vocabulary/is_model_vocabulary.dart'
+    show
+        CalledToolName,
+        CutOffReply,
+        FinishedReply,
+        IllFormedName,
+        ModelReply,
+        ModelUsage,
+        ProposedToolCalls,
+        ProviderContinuation,
+        ToolCall,
+        ToolCallId,
+        ToolInput,
+        ToolName,
+        WellFormedName;
 export 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart';
 export 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 
