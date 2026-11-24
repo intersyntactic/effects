@@ -267,6 +267,36 @@ Object? encodeProgramToRun(ProgramName program, Args args) => {
   );
 }
 
+// ProgramRequest
+
+Object? encodeProgramRequest(ProgramRequest request) => switch (request) {
+  RunProgramRequest(:final program, :final args) => {
+    'kind': 'run',
+    'programToRun': encodeProgramToRun(program, args),
+  },
+  ListInstalledProgramsRequest() => {'kind': 'list'},
+};
+
+ProgramRequest decodeProgramRequest(
+  Object? json, [
+  String field = 'programRequest',
+]) {
+  final map = _object(json, field);
+  // wire-ok: this is the wire; decodeX pairs with encodeX above
+  return switch (map['kind']) {
+    'run' => switch (decodeProgramToRun(
+      map['programToRun'],
+      '$field.programToRun',
+    )) {
+      (final program, final args) => RunProgramRequest(program, args),
+    },
+    'list' => const ListInstalledProgramsRequest(),
+    final other => throw FormatException(
+      '$field.kind: not "run" or "list" ($other)',
+    ),
+  };
+}
+
 // Progress
 
 Object? encodeProgress(Progress progress) => switch (progress) {

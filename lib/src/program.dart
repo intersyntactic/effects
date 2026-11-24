@@ -50,6 +50,25 @@ final class Args {
   final RelativePath inFolder;
 }
 
+/// What the airlock asks the program driver to do.
+sealed class ProgramRequest {
+  const ProgramRequest();
+}
+
+/// Run [program] with [args]; the answer is a line per [ProgramMessage].
+final class RunProgramRequest extends ProgramRequest {
+  const RunProgramRequest(this.program, this.args);
+
+  final ProgramName program;
+  final Args args;
+}
+
+/// Say which programs are installed; the answer is one line, their names
+/// as a sorted JSON list.
+final class ListInstalledProgramsRequest extends ProgramRequest {
+  const ListInstalledProgramsRequest();
+}
+
 /// What a driver reports while an action is underway, before its outcome.
 sealed class Progress {
   const Progress();

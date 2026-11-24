@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.4
+
+- `ProgramRequest`: what the airlock asks the program driver to do, as
+  `RunProgramRequest(program, args)` or `ListInstalledProgramsRequest()`,
+  with `encodeProgramRequest` and `decodeProgramRequest`. The JSON is
+  program_driver's own, byte for byte (`{"kind": "run", "programToRun"}`
+  or `{"kind": "list"}`), so an airlock can hold its own program client
+  without depending on program_driver.
+
 ## 0.14.3
 
 - `SignIn`, with `encodeSignIn` / `decodeSignIn`, now lives in
