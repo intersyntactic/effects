@@ -1011,17 +1011,29 @@ void main() {
       expect((decoded as NothingRan).why, 'denied');
     });
 
-    test('round-trips StoppedPartway', () {
-      final outcome = const StoppedPartway(
+    test('round-trips StoppedPartway with what it had done, typed', () {
+      final outcome = const StoppedPartway<Wrote>(
         why: 'connection reset',
-        done: 'sent 1 of 3',
+        done: Wrote(replaced: true),
       );
       final decoded = decodeOutcome<Wrote>(
         encodeOutcome(outcome, encodeWrote),
         decodeWrote,
       );
-      final stopped = decoded as StoppedPartway;
-      expect((stopped.why, stopped.done), ('connection reset', 'sent 1 of 3'));
+      final stopped = decoded as StoppedPartway<Wrote>;
+      expect(stopped.why, 'connection reset');
+      expect(stopped.done?.replaced, true);
+    });
+
+    test('round-trips StoppedPartway with what it had done unknown', () {
+      final decoded = decodeOutcome<Wrote>(
+        encodeOutcome(
+          const StoppedPartway<Wrote>(why: 'crashed', done: null),
+          encodeWrote,
+        ),
+        decodeWrote,
+      );
+      expect((decoded as StoppedPartway<Wrote>).done, isNull);
     });
 
     test('reads an old "refused" as StoppedPartway, never NothingRan', () {
@@ -1029,11 +1041,9 @@ void main() {
         'kind': 'refused',
         'why': 'denied',
       }, decodeWrote);
-      final stopped = decoded as StoppedPartway;
-      expect(
-        (stopped.why, stopped.done),
-        ('denied', doneBeforeOutcomesWereSplit),
-      );
+      final stopped = decoded as StoppedPartway<Wrote>;
+      expect(stopped.why, 'denied');
+      expect(stopped.done, isNull);
     });
 
     test('refuses an unknown kind', () {

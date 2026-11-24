@@ -707,15 +707,9 @@ Object? encodeOutcome<O>(
   StoppedPartway(:final why, :final done) => {
     'kind': 'stoppedPartway',
     'why': why,
-    'done': done,
+    'done': done == null ? null : encodeOutput(done),
   },
 };
-
-/// What [StoppedPartway.done] says for an outcome recorded as `refused`,
-/// before outcomes were split: it may have been either, so it reads as the
-/// one that is never safe to retry.
-const doneBeforeOutcomesWereSplit =
-    'unknown: recorded before outcomes were split';
 
 Outcome<O> decodeOutcome<O>(
   Object? json,
@@ -729,11 +723,16 @@ Outcome<O> decodeOutcome<O>(
     'nothingRan' => NothingRan(_string(map['why'], '$field.why')),
     'stoppedPartway' => StoppedPartway(
       why: _string(map['why'], '$field.why'),
-      done: _string(map['done'], '$field.done'),
+      done: switch (map['done']) {
+        null => null,
+        final done => decodeOutput(done, '$field.done'),
+      },
     ),
+    // Recorded before the split, so it may have been either: it reads as
+    // the one never safe to retry, with what it had done unknown.
     'refused' => StoppedPartway(
       why: _string(map['why'], '$field.why'),
-      done: doneBeforeOutcomesWereSplit,
+      done: null,
     ),
     final other => throw FormatException(
       '$field.kind: not "ran", "nothingRan" or "stoppedPartway" ($other)',

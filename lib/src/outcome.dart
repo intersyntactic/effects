@@ -20,11 +20,14 @@ final class NothingRan extends Outcome<Never> {
   final String why;
 }
 
-/// It started and stopped before the end, after [done] had already
-/// happened, for [why]. Never safe to retry as if nothing ran.
-final class StoppedPartway extends Outcome<Never> {
+/// It started and stopped before the end, for [why]. Never safe to retry as
+/// if nothing ran.
+final class StoppedPartway<O> extends Outcome<O> {
   const StoppedPartway({required this.why, required this.done});
 
   final String why;
-  final String done;
+
+  /// The output of what had happened before it stopped, such as the
+  /// responses to the requests already sent; null when that isn't known.
+  final O? done;
 }

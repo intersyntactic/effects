@@ -38,9 +38,11 @@ the decision and what follows stay with `is_airlock_api`.
   `ModelUsage`, null when the driver can't report one).
 - `Outcome<O>`, split on whether the world changed: `Ran(output)`;
   `NothingRan(why)`, where nothing happened (a deny, no driver, bad
-  input); or `StoppedPartway(why, done)`, where `done` already happened
-  and it is never safe to retry. An outcome recorded as `refused` before
-  the split reads back as `StoppedPartway`.
+  input); or `StoppedPartway(why, done)`, never safe to retry, where
+  `done` is the action's own output for what had already happened (the
+  responses to the requests already sent), or null when that isn't
+  known. An outcome recorded as `refused` before the split reads back as
+  `StoppedPartway` with `done` null.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output, `ReplyArriving` for a piece of the model's reply as
   it streams — never recorded; only the whole `ModelReply` is.
