@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.3
 
 - `SignIn`, with `encodeSignIn` / `decodeSignIn`, now lives in
   `is_sign_in_vocabulary`, which this package depends on and re-exports.
