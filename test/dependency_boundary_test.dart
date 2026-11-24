@@ -44,6 +44,7 @@ bool _allowed(String target) {
       'path',
       'is_model_vocabulary',
       'is_path_confinement',
+      'is_reply_vocabulary',
       'is_sign_in_vocabulary',
       'is_web_address_vocabulary',
     }.contains(uri.pathSegments.first),

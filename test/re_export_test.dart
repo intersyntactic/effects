@@ -1,5 +1,6 @@
 import 'package:is_effects/is_effects.dart' as effects;
 import 'package:is_model_vocabulary/is_model_vocabulary.dart' as model;
+import 'package:is_reply_vocabulary/is_reply_vocabulary.dart' as reply;
 import 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart' as sign_in;
 import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart'
     as vocabulary;
@@ -41,6 +42,16 @@ void main() {
     expect(effects.WebPath, same(vocabulary.WebPath));
     expect(effects.PathPrefix, same(vocabulary.PathPrefix));
     expect(effects.AddressPrefix, same(vocabulary.AddressPrefix));
+  });
+
+  test('the reply types are the reply vocabulary\'s own, not copies', () {
+    expect(effects.ReplyEndpoint, same(reply.ReplyEndpoint));
+    expect(effects.PostedMessage, same(reply.PostedMessage));
+    expect(effects.SlackMessageTimestamp, same(reply.SlackMessageTimestamp));
+    expect(
+      effects.ServerAssignedMessageId,
+      same(reply.ServerAssignedMessageId),
+    );
   });
 
   test('an AddressPrefix from one decodes as the other', () {
