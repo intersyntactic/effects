@@ -15,13 +15,6 @@ dependencies:
   is_web_address_vocabulary: ^0.1.1
   path: ^1.9.1
 
-# Until is_sign_in_vocabulary 0.1.0 is on pub.dev.
-dependency_overrides:
-  is_sign_in_vocabulary:
-    git:
-      url: https://github.com/intersyntactic/sign_in_vocabulary
-      ref: initial-package
-
 dev_dependencies:
   analyzer: ^14.7.0
   lints: ^6.1.0
