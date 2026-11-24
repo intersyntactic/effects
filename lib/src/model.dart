@@ -74,7 +74,7 @@ final class ModelAndSignIn {
 /// Either [FinishedReply] (the model was done) or [CutOffReply] (the call
 /// ran and spent tokens, but the reply ended before the model was —
 /// such as ChatGPT's own `incomplete` status). Still recorded as [Ran],
-/// never [Refused]: tokens were spent, and a reply, however partial,
+/// never [StoppedPartway]: tokens were spent, and a reply, however partial,
 /// came back. The two are a closed set on purpose: a cut-off reply reads
 /// a caller handles differently from a whole one (it isn't the agent's
 /// full word, isn't what the model actually said in full to post or to

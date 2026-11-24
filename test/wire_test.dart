@@ -483,11 +483,11 @@ void main() {
       expect(
         jsonEncode(
           encodeProgramMessage(
-            Finished<ModelReply>(const Refused('no sign-in')),
+            Finished<ModelReply>(const NothingRan('no sign-in')),
             encodeModelReply,
           ),
         ),
-        startsWith('{"kind":"finished","outcome":{"kind":"refused"'),
+        startsWith('{"kind":"finished","outcome":{"kind":"nothingRan"'),
       );
     });
   });
@@ -1002,13 +1002,45 @@ void main() {
       expect((decoded as Ran<Wrote>).output.replaced, false);
     });
 
-    test('round-trips Refused', () {
-      final outcome = const Refused('denied');
+    test('round-trips NothingRan', () {
+      final outcome = const NothingRan('denied');
       final decoded = decodeOutcome<Wrote>(
         encodeOutcome(outcome, encodeWrote),
         decodeWrote,
       );
-      expect((decoded as Refused).why, 'denied');
+      expect((decoded as NothingRan).why, 'denied');
+    });
+
+    test('round-trips StoppedPartway', () {
+      final outcome = const StoppedPartway(
+        why: 'connection reset',
+        done: 'sent 1 of 3',
+      );
+      final decoded = decodeOutcome<Wrote>(
+        encodeOutcome(outcome, encodeWrote),
+        decodeWrote,
+      );
+      final stopped = decoded as StoppedPartway;
+      expect((stopped.why, stopped.done), ('connection reset', 'sent 1 of 3'));
+    });
+
+    test('reads an old "refused" as StoppedPartway, never NothingRan', () {
+      final decoded = decodeOutcome<Wrote>({
+        'kind': 'refused',
+        'why': 'denied',
+      }, decodeWrote);
+      final stopped = decoded as StoppedPartway;
+      expect(
+        (stopped.why, stopped.done),
+        ('denied', doneBeforeOutcomesWereSplit),
+      );
+    });
+
+    test('refuses an unknown kind', () {
+      expect(
+        () => decodeOutcome<Wrote>({'kind': 'skipped'}, decodeWrote),
+        throwsFormatException,
+      );
     });
   });
 }

@@ -703,8 +703,19 @@ Object? encodeOutcome<O>(
   Object? Function(O output) encodeOutput,
 ) => switch (outcome) {
   Ran(:final output) => {'kind': 'ran', 'output': encodeOutput(output)},
-  Refused(:final why) => {'kind': 'refused', 'why': why},
+  NothingRan(:final why) => {'kind': 'nothingRan', 'why': why},
+  StoppedPartway(:final why, :final done) => {
+    'kind': 'stoppedPartway',
+    'why': why,
+    'done': done,
+  },
 };
+
+/// What [StoppedPartway.done] says for an outcome recorded as `refused`,
+/// before outcomes were split: it may have been either, so it reads as the
+/// one that is never safe to retry.
+const doneBeforeOutcomesWereSplit =
+    'unknown: recorded before outcomes were split';
 
 Outcome<O> decodeOutcome<O>(
   Object? json,
@@ -715,9 +726,17 @@ Outcome<O> decodeOutcome<O>(
   // wire-ok: this is the wire; decodeX pairs with encodeX above
   return switch (map['kind']) {
     'ran' => Ran(decodeOutput(map['output'], '$field.output')),
-    'refused' => Refused(_string(map['why'], '$field.why')),
+    'nothingRan' => NothingRan(_string(map['why'], '$field.why')),
+    'stoppedPartway' => StoppedPartway(
+      why: _string(map['why'], '$field.why'),
+      done: _string(map['done'], '$field.done'),
+    ),
+    'refused' => StoppedPartway(
+      why: _string(map['why'], '$field.why'),
+      done: doneBeforeOutcomesWereSplit,
+    ),
     final other => throw FormatException(
-      '$field.kind: not "ran" or "refused" ($other)',
+      '$field.kind: not "ran", "nothingRan" or "stoppedPartway" ($other)',
     ),
   };
 }

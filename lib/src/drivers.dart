@@ -20,12 +20,12 @@ abstract interface class CarriesOutActions {}
 /// [isInsideTree].
 ///
 /// The caller chooses text or bytes, so the airlock decides on exactly what
-/// will come back. A file [read] as text that isn't UTF-8 is [Refused], never
-/// decoded loosely. [ReadText] is the file's exact text, a leading byte order
-/// mark (U+FEFF) included, which Dart's `utf8.decode` would drop; a [write]
-/// of it puts back the bytes that were read. How large a file [readBytes]
-/// returns is the driver's to decide: one over that is [Refused], since
-/// every byte returned is recorded.
+/// will come back. A file [read] as text that isn't UTF-8 is [NothingRan],
+/// never decoded loosely. [ReadText] is the file's exact text, a leading
+/// byte order mark (U+FEFF) included, which Dart's `utf8.decode` would drop;
+/// a [write] of it puts back the bytes that were read. How large a file
+/// [readBytes] returns is the driver's to decide: one over that is
+/// [NothingRan], since every byte returned is recorded.
 abstract interface class ReadsAndWritesFiles implements CarriesOutActions {
   Future<Outcome<ReadResult>> read(RelativePath path);
   Future<Outcome<BytesReadResult>> readBytes(RelativePath path);
@@ -58,16 +58,17 @@ abstract interface class ListsInstalledPrograms {
 ///
 /// A 2xx response's body comes back as [ProposedRequest.keep] asks:
 /// [TextBody] for text, [BytesBody] for bytes, [NoBody] otherwise. A text
-/// body that isn't UTF-8 is [Refused], never decoded loosely, and a
+/// body that isn't UTF-8 is [StoppedPartway], never decoded loosely, and a
 /// [TextBody] keeps a leading byte order mark (U+FEFF), as a file read
 /// does. How large a body it keeps is the driver's to decide: one over that
-/// is [Refused], since every byte kept is recorded.
+/// is [StoppedPartway], since every byte kept is recorded. Both are
+/// partway, not [NothingRan]: the request was already sent.
 ///
 /// Which redirects it follows is the driver's, and it never sends a
 /// sign-in's secret across to another origin; every hop it followed is
 /// named, in order, in [WebResponse.redirects]. A hop on the request's own
-/// origin that leaves its [GrantedRequest.grantedPathPrefix] is [Refused],
-/// never followed.
+/// origin that leaves its [GrantedRequest.grantedPathPrefix] is
+/// [StoppedPartway], never followed, since the hops before it were sent.
 abstract interface class CarriesOutWebRequests implements CarriesOutActions {
   Future<Outcome<WebResponse>> carryOutWebRequest(GrantedRequest request);
 }

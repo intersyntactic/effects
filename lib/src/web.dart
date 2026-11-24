@@ -182,7 +182,7 @@ final class RedirectedTo {
 ///
 /// [body] is what [ProposedRequest.keep] asked for, only for a 2xx [status].
 /// [redirects] are the hops the driver followed to reach the response. A
-/// refused sign-in, where nothing was sent, is [Refused], not this.
+/// refused sign-in, where nothing was sent, is [NothingRan], not this.
 final class WebResponse {
   const WebResponse({
     required this.status,

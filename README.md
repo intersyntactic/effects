@@ -36,7 +36,11 @@ the decision and what follows stay with `is_airlock_api`.
   a closed set, so a caller can't treat a cut-off answer as the model's
   full word just because it forgot to check. Both carry `usage` (a
   `ModelUsage`, null when the driver can't report one).
-- `Outcome<O>`: `Ran(output)`, or `Refused(why)`.
+- `Outcome<O>`, split on whether the world changed: `Ran(output)`;
+  `NothingRan(why)`, where nothing happened (a deny, no driver, bad
+  input); or `StoppedPartway(why, done)`, where `done` already happened
+  and it is never safe to retry. An outcome recorded as `refused` before
+  the split reads back as `StoppedPartway`.
 - `Progress`: what a driver reports while it works, `Printed` for a
   program's output, `ReplyArriving` for a piece of the model's reply as
   it streams — never recorded; only the whole `ModelReply` is.
