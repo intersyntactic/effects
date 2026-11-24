@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- `SignIn`, with `encodeSignIn` / `decodeSignIn`, now lives in
+  `is_sign_in_vocabulary`, which this package depends on and re-exports.
+  It is the same type, so nothing that imports it from here changes;
+  `is_tools_api` can carry a sign-in without depending on this package.
+- Requires `is_web_address_vocabulary` ^0.1.1, whose `decodeAddressPrefix`
+  refuses keys it doesn't expect.
+
 ## 0.14.2
 
 - `Origin`, `WebPath`, `PathPrefix` and `AddressPrefix`, with their

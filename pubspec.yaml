@@ -11,7 +11,8 @@ environment:
 
 dependencies:
   is_path_confinement: ^0.1.0
-  is_web_address_vocabulary: ^0.1.0
+  is_sign_in_vocabulary: ^0.1.0
+  is_web_address_vocabulary: ^0.1.1
   path: ^1.9.1
 
 dev_dependencies:

@@ -43,6 +43,7 @@ bool _allowed(String target) {
     'package' => const {
       'path',
       'is_path_confinement',
+      'is_sign_in_vocabulary',
       'is_web_address_vocabulary',
     }.contains(uri.pathSegments.first),
     '' => !uri.isAbsolute && !uri.pathSegments.contains('..'),
