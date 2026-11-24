@@ -27,7 +27,9 @@ final class StoppedPartway<O> extends Outcome<O> {
 
   final String why;
 
-  /// The output of what had happened before it stopped, such as the
-  /// responses to the requests already sent; null when that isn't known.
+  /// The output of the steps that finished before it stopped, such as the
+  /// responses to the requests already answered. The step it stopped in,
+  /// whose effect may be unknown, is [why]'s to describe, never left out by
+  /// making this null. Null only when which steps finished isn't known.
   final O? done;
 }
