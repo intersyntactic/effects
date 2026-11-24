@@ -1,4 +1,5 @@
 import 'package:is_effects/is_effects.dart' as effects;
+import 'package:is_model_vocabulary/is_model_vocabulary.dart' as model;
 import 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart' as sign_in;
 import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart'
     as vocabulary;
@@ -13,6 +14,26 @@ void main() {
       ),
       sign_in.SignIn.parse('a-bot'),
     );
+  });
+
+  test('the model replies are the model vocabulary\'s own, not copies', () {
+    expect(effects.ModelReply, same(model.ModelReply));
+    expect(effects.ProposedToolCalls, same(model.ProposedToolCalls));
+    expect(effects.ModelUsage, same(model.ModelUsage));
+    expect(effects.ToolCall, same(model.ToolCall));
+    final reply = effects.decodeModelReply(
+      model.ProposedToolCalls(
+        text: '',
+        calls: [
+          model.ToolCall(
+            id: model.ToolCallId.parse('toolu_1')!,
+            name: model.CalledToolName.fromSent('Read'),
+            input: model.ToolInput.parse('{}')!,
+          ),
+        ],
+      ).toJson(),
+    );
+    expect(reply, isA<model.ProposedToolCalls>());
   });
 
   test('the web address types are the vocabulary\'s own, not copies', () {

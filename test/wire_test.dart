@@ -739,10 +739,11 @@ void main() {
       });
     });
 
-    test('a switch over ModelReply must handle both cases', () {
+    test('a switch over ModelReply must handle every case', () {
       String describe(ModelReply reply) => switch (reply) {
         FinishedReply() => 'finished',
         CutOffReply() => 'cut off',
+        ProposedToolCalls() => 'proposed tools',
       };
       expect(describe(const FinishedReply(text: 'hi')), 'finished');
       expect(describe(const CutOffReply(text: 'hi')), 'cut off');

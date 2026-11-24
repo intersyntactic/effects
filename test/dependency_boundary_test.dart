@@ -42,6 +42,7 @@ bool _allowed(String target) {
     'dart' => _allowedSdk.contains(target),
     'package' => const {
       'path',
+      'is_model_vocabulary',
       'is_path_confinement',
       'is_sign_in_vocabulary',
       'is_web_address_vocabulary',

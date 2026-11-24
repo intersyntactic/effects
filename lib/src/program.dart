@@ -1,4 +1,5 @@
-import 'model.dart';
+import 'package:is_model_vocabulary/is_model_vocabulary.dart' show ModelReply;
+
 import 'outcome.dart';
 import 'relative_path.dart';
 

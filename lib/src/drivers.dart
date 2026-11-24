@@ -1,3 +1,4 @@
+import 'package:is_model_vocabulary/is_model_vocabulary.dart' show ModelReply;
 import 'package:is_path_confinement/is_path_confinement.dart' show isInsideTree;
 
 import 'file.dart';

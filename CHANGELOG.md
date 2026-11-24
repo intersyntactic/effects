@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.15.0
+
+Breaking: every reader of `Outcome` or `ModelReply` moves.
+
+- `Outcome` splits on whether the world changed. `Refused` is gone:
+  `NothingRan(why)` means nothing happened (an airlock deny, no driver, bad
+  input), and `StoppedPartway<O>(why, done)` is never safe to retry, with
+  `done` the action's own output for the steps that finished (null when
+  that isn't known). The JSON kinds are `nothingRan` and `stoppedPartway`.
+  An outcome recorded as `refused` reads back as `StoppedPartway` with
+  `done` null: it may have been either, and only that reading never calls
+  something safe to retry.
+- `ModelReply` and `ModelUsage` now live in `is_model_vocabulary` ^0.2.0,
+  re-exported here with what a proposal of tools carries (`ToolCall`,
+  `ToolCallId`, `CalledToolName`, `ToolInput`, `ProviderContinuation`,
+  `ToolName`). `ModelReply` gains `ProposedToolCalls`, so a switch over it
+  must handle three cases. `encodeModelReply` and `decodeModelReply` keep
+  their names and their JSON for the replies that existed;
+  `decodeModelReply` now refuses a key it doesn't expect.
+- The turns and the `request` text (`ModelTurn`, `ModelRequest`) are not
+  re-exported: import them from `is_model_vocabulary`, since airlock_api
+  has a `ModelRequest` of its own.
+
 ## 0.14.4
 
 - `ProgramRequest`: what the airlock asks the program driver to do, as
