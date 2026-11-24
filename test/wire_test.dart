@@ -232,6 +232,54 @@ void main() {
     });
   });
 
+  group('ProgramRequest', () {
+    final run = RunProgramRequest(
+      ProgramName.parse('git')!,
+      const Args(['status'], stdin: 'x'),
+    );
+
+    test('each kind is the exact JSON program_driver 0.2.2 reads', () {
+      // program_driver's RunProgram.toJson, byte for byte.
+      expect(
+        jsonEncode(encodeProgramRequest(run)),
+        jsonEncode({
+          'kind': 'run',
+          'programToRun': encodeProgramToRun(run.program, run.args),
+        }),
+      );
+      expect(
+        jsonEncode(encodeProgramRequest(const ListInstalledProgramsRequest())),
+        '{"kind":"list"}',
+      );
+    });
+
+    test('round-trips each kind', () {
+      final decoded =
+          decodeProgramRequest(encodeProgramRequest(run)) as RunProgramRequest;
+      expect(decoded.program, run.program);
+      expect(decoded.args.args, ['status']);
+      expect(decoded.args.stdin, 'x');
+
+      expect(
+        decodeProgramRequest({'kind': 'list'}),
+        isA<ListInstalledProgramsRequest>(),
+      );
+    });
+
+    test('refuses an unknown kind, naming it', () {
+      expect(
+        () => decodeProgramRequest({'kind': 'kill'}),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('kill'),
+          ),
+        ),
+      );
+    });
+  });
+
   group('FileRequest', () {
     test('each kind is the JSON file_driver already sends', () {
       expect(encodeFileRequest(ReadFileRequest(RelativePath('a.txt'))), {
