@@ -1,4 +1,5 @@
 import 'package:is_effects/is_effects.dart';
+import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 import 'package:test/test.dart';
 
 void main() {

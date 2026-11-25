@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:is_effects/is_effects.dart';
+import 'package:is_model_vocabulary/is_model_vocabulary.dart';
+import 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart';
+import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 import 'package:test/test.dart';
 
 void main() {

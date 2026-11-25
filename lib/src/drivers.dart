@@ -87,7 +87,8 @@ abstract interface class CarriesOutWebRequests implements CarriesOutActions {
 /// never directly. [systemPrompt] and [request] are each the exact bytes
 /// the airlock has approved, verbatim; [report] carries each
 /// [ReplyArriving] piece as it streams, never recorded, until the whole
-/// [ModelReply] is.
+/// [ModelReply] is. A reply cut off or proposing tools is still [Ran]:
+/// tokens were spent and a reply came back.
 ///
 /// When [request] itself names a model, that name must be [model], or the
 /// driver refuses without calling: the airlock decided on [model], so the
