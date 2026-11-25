@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.17.0
+
+Breaking: `PostsRepliesInSlackConversations` and
+`PostsRepliesUnderWebAddresses` are gone, and is_effects no longer depends
+on `is_reply_vocabulary`. A reply now goes out through the ordinary
+`CarriesOutWebRequests`, so the web driver knows nothing of Slack or
+Teams: the module writes the requests as pure code, under
+`is_reply_requests_api`'s `WritesSlackReplyRequests` and
+`WritesWebAddressReplyRequests`, and the airlock grants and sends them.
+Nothing implemented the removed interfaces.
+
 ## 0.16.0
 
 Breaking: is_effects re-exports nothing. A package that used a type from

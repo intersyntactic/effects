@@ -1,13 +1,5 @@
 import 'package:is_model_vocabulary/is_model_vocabulary.dart' show ModelReply;
 import 'package:is_path_confinement/is_path_confinement.dart' show isInsideTree;
-import 'package:is_reply_vocabulary/is_reply_vocabulary.dart'
-    show
-        PostedMessage,
-        RepliesInSlackConversation,
-        RepliesUnderWebAddress,
-        ReplyText,
-        ServerAssignedMessageId,
-        SlackMessageTimestamp;
 
 import 'file.dart';
 import 'model.dart';
@@ -101,42 +93,4 @@ abstract interface class AsksTheModel implements CarriesOutActions {
     String request, {
     required Report report,
   });
-}
-
-/// Posts a reply's text in the Slack channel its endpoint names, in that
-/// endpoint's thread when it names one, through its origin. Holds the
-/// bot's Slack sign-in.
-///
-/// The airlock decides on the whole [text]; how it is split into messages
-/// Slack will take is the driver's, so one reply may post several, in
-/// order, and a [Ran] names at least one. It returns each message's
-/// timestamp as Slack named it, never a [PostedMessage]: that is made from
-/// the endpoint the airlock granted, so the logbook's conversation is the
-/// grant's, never the driver's.
-///
-/// [NothingRan] only when no request was sent. A failure once one was is
-/// [StoppedPartway], with `done` the timestamps of the messages that
-/// posted, empty if none did.
-abstract interface class PostsRepliesInSlackConversations
-    implements CarriesOutActions {
-  Future<Outcome<List<SlackMessageTimestamp>>> reply(
-    RepliesInSlackConversation to,
-    ReplyText text,
-  );
-}
-
-/// Posts a reply's text under a conversation's web address, as Teams' Bot
-/// Connector takes it. Holds the sign-in that address's server takes.
-///
-/// As [PostsRepliesInSlackConversations]: the airlock decides on the whole
-/// [text], the driver splits it, and it returns each message's id as the
-/// server named it, never a [PostedMessage]. [NothingRan] only when no
-/// request was sent; after that, [StoppedPartway]'s `done` is the ids of
-/// the messages that posted, empty if none did.
-abstract interface class PostsRepliesUnderWebAddresses
-    implements CarriesOutActions {
-  Future<Outcome<List<ServerAssignedMessageId>>> reply(
-    RepliesUnderWebAddress to,
-    ReplyText text,
-  );
 }
