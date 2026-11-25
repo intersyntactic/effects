@@ -8,8 +8,8 @@
 /// airlock.
 ///
 /// Exports only what this package declares. The types it uses from other
-/// vocabularies (sign-ins, web addresses, reply endpoints, the model's
-/// replies) are imported from those packages directly.
+/// vocabularies (sign-ins, web addresses, the model's replies) are imported
+/// from those packages directly.
 library;
 
 export 'src/bot_pool.dart';
