@@ -5,6 +5,7 @@ import 'package:is_reply_vocabulary/is_reply_vocabulary.dart'
         PostedMessage,
         RepliesInSlackConversation,
         RepliesUnderWebAddress,
+        ReplyText,
         ServerAssignedMessageId,
         SlackMessageTimestamp;
 
@@ -107,18 +108,19 @@ abstract interface class AsksTheModel implements CarriesOutActions {
 ///
 /// The airlock decides on the whole [text]; how it is split into messages
 /// Slack will take is the driver's, so one reply may post several, in
-/// order. It returns each message's timestamp as Slack named it, never a
-/// [PostedMessage]: that is made from the endpoint the airlock granted, so
-/// the logbook's conversation is the grant's, never the driver's.
+/// order, and a [Ran] names at least one. It returns each message's
+/// timestamp as Slack named it, never a [PostedMessage]: that is made from
+/// the endpoint the airlock granted, so the logbook's conversation is the
+/// grant's, never the driver's.
 ///
-/// [NothingRan] only when no request was sent. A failure after the first
-/// message posted is [StoppedPartway], with `done` the timestamps of the
-/// messages that did.
+/// [NothingRan] only when no request was sent. A failure once one was is
+/// [StoppedPartway], with `done` the timestamps of the messages that
+/// posted, empty if none did.
 abstract interface class PostsRepliesInSlackConversations
     implements CarriesOutActions {
   Future<Outcome<List<SlackMessageTimestamp>>> reply(
     RepliesInSlackConversation to,
-    String text,
+    ReplyText text,
   );
 }
 
@@ -127,12 +129,13 @@ abstract interface class PostsRepliesInSlackConversations
 ///
 /// As [PostsRepliesInSlackConversations]: the airlock decides on the whole
 /// [text], the driver splits it, and it returns each message's id as the
-/// server named it, never a [PostedMessage]; [StoppedPartway]'s `done` is
-/// the ids of the messages that posted.
+/// server named it, never a [PostedMessage]. [NothingRan] only when no
+/// request was sent; after that, [StoppedPartway]'s `done` is the ids of
+/// the messages that posted, empty if none did.
 abstract interface class PostsRepliesUnderWebAddresses
     implements CarriesOutActions {
   Future<Outcome<List<ServerAssignedMessageId>>> reply(
     RepliesUnderWebAddress to,
-    String text,
+    ReplyText text,
   );
 }

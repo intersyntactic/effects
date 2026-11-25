@@ -2,15 +2,16 @@
 
 ## 0.16.0
 
-- Two drivers that post a reply's text, one for each kind of
+- Two drivers that post a reply's `ReplyText`, one for each kind of
   `ReplyEndpoint`: `PostsRepliesInSlackConversations` returns the Slack
   timestamp of each message it posted, and `PostsRepliesUnderWebAddresses`
   the id the server gave each one. A driver never returns a
   `PostedMessage`: the caller builds each one with `.answering` from the
   endpoint the airlock granted. A driver splits a long text however its
-  server needs, and a failure after the first message posted is
-  `StoppedPartway`, with `done` the ids of the ones that did.
-- Re-exports `is_reply_vocabulary` ^0.1.0 (`ReplyEndpoint`,
+  server needs, so a `Ran` names at least one message. `NothingRan` only
+  when no request was sent; after that a failure is `StoppedPartway`, with
+  `done` the ids of the messages that posted.
+- Re-exports `is_reply_vocabulary` ^0.1.1 (`ReplyEndpoint`, `ReplyText`,
   `PostedMessage` and their ids), so they are one type whichever package a
   caller imports them from. A new minor version, since names a dependent
   declares itself may now clash.

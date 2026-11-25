@@ -47,6 +47,7 @@ void main() {
   test('the reply types are the reply vocabulary\'s own, not copies', () {
     expect(effects.ReplyEndpoint, same(reply.ReplyEndpoint));
     expect(effects.PostedMessage, same(reply.PostedMessage));
+    expect(effects.ReplyText, same(reply.ReplyText));
     expect(effects.SlackMessageTimestamp, same(reply.SlackMessageTimestamp));
     expect(
       effects.ServerAssignedMessageId,
