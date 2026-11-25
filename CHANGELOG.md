@@ -2,6 +2,23 @@
 
 ## 0.16.0
 
+Breaking: is_effects re-exports nothing. A package that used a type from
+another vocabulary through is_effects now depends on that vocabulary and
+imports it directly:
+
+- `is_model_vocabulary` ^0.2.0: `ModelReply`, `FinishedReply`,
+  `CutOffReply`, `ProposedToolCalls`, `ModelUsage`, `ToolCall`,
+  `ToolCallId`, `CalledToolName`, `WellFormedName`, `IllFormedName`,
+  `ToolInput`, `ToolName`, `ProviderContinuation`.
+- `is_sign_in_vocabulary` ^0.1.0: `SignIn` and its JSON.
+- `is_web_address_vocabulary` ^0.1.1: `Origin`, `WebPath`, `PathPrefix`,
+  `AddressPrefix` and their JSON.
+- `is_reply_vocabulary` ^0.2.0: `ReplyEndpoint`, `ReplyText`,
+  `PostedMessage` and their ids, for the new reply drivers.
+
+The types are the same declarations as before, so values pass between
+packages unchanged; only the import line moves.
+
 - Two drivers that post a reply's `ReplyText`, one for each kind of
   `ReplyEndpoint`: `PostsRepliesInSlackConversations` returns the Slack
   timestamp of each message it posted, and `PostsRepliesUnderWebAddresses`
@@ -11,10 +28,6 @@
   server needs, so a `Ran` names at least one message. `NothingRan` only
   when no request was sent; after that a failure is `StoppedPartway`, with
   `done` the ids of the messages that posted.
-- Re-exports `is_reply_vocabulary` ^0.1.1 (`ReplyEndpoint`, `ReplyText`,
-  `PostedMessage` and their ids), so they are one type whichever package a
-  caller imports them from. A new minor version, since names a dependent
-  declares itself may now clash.
 
 ## 0.15.0
 

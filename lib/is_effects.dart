@@ -6,35 +6,11 @@
 /// drivers carry them out. A driver is given only the action's program and
 /// input; the trajectory, the decision and what follows stay with the
 /// airlock.
+///
+/// Exports only what this package declares. The types it uses from other
+/// vocabularies (sign-ins, web addresses, reply endpoints, the model's
+/// replies) are imported from those packages directly.
 library;
-
-// Re-exported so SignIn, Origin, WebPath, PathPrefix, AddressPrefix, the
-// reply endpoints and the model's replies stay one type whichever package a
-// caller imports them from.
-//
-// A reply is recorded as Ran even when cut off or proposing tools: tokens
-// were spent and a reply came back. Only the reply and what a proposal of
-// tools carries come through here; the turns and the request are imported
-// from is_model_vocabulary itself, since airlock_api has a ModelRequest of
-// its own.
-export 'package:is_model_vocabulary/is_model_vocabulary.dart'
-    show
-        CalledToolName,
-        CutOffReply,
-        FinishedReply,
-        IllFormedName,
-        ModelReply,
-        ModelUsage,
-        ProposedToolCalls,
-        ProviderContinuation,
-        ToolCall,
-        ToolCallId,
-        ToolInput,
-        ToolName,
-        WellFormedName;
-export 'package:is_reply_vocabulary/is_reply_vocabulary.dart';
-export 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart';
-export 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 
 export 'src/bot_pool.dart';
 export 'src/drivers.dart';

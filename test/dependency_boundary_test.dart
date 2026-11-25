@@ -74,4 +74,34 @@ void main() {
       reason: 'is_effects names actions and carries out none',
     );
   });
+
+  test('exports only its own files, never another package', () {
+    final reExports = <String>[];
+    for (final file in Directory(
+      'lib',
+    ).listSync(recursive: true).whereType<File>()) {
+      if (!file.path.endsWith('.dart')) continue;
+      final unit = parseString(
+        content: file.readAsStringSync(),
+        throwIfDiagnostics: false,
+      ).unit;
+      for (final directive in unit.directives.whereType<ExportDirective>()) {
+        final uris = [
+          directive.uri,
+          for (final branch in directive.configurations) branch.uri,
+        ];
+        for (final literal in uris) {
+          final target = literal.stringValue;
+          if (target == null || Uri.parse(target).hasScheme) {
+            reExports.add('${file.path}: ${target ?? literal.toSource()}');
+          }
+        }
+      }
+    }
+    expect(
+      reExports,
+      isEmpty,
+      reason: 'a dependent imports each vocabulary it uses directly',
+    );
+  });
 }
