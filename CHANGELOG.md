@@ -13,7 +13,7 @@ imports it directly:
 - `is_sign_in_vocabulary` ^0.1.0: `SignIn` and its JSON.
 - `is_web_address_vocabulary` ^0.1.1: `Origin`, `WebPath`, `PathPrefix`,
   `AddressPrefix` and their JSON.
-- `is_reply_vocabulary` ^0.1.1: `ReplyEndpoint`, `ReplyText`,
+- `is_reply_vocabulary` ^0.2.0: `ReplyEndpoint`, `ReplyText`,
   `PostedMessage` and their ids, for the new reply drivers.
 
 The types are the same declarations as before, so values pass between
