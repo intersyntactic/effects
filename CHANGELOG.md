@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.18.0
+
+Breaking: on `is_model_vocabulary` ^0.3.0, and through it `checked_json`
+^0.3.0, so is_effects can sit beside `is_conversation_vocabulary`. Its
+`ToolInput`, `ProviderContinuation` and `ModelRequest` now refuse text
+that names a key twice or has an integer past 2^53 - 1. No code here
+changed.
+
 ## 0.17.0
 
 Breaking: `PostsRepliesInSlackConversations` and
