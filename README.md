@@ -60,6 +60,15 @@ report's codec as well as the output's. A program driver's answer is
 `ModelCall.fromJson` refuses a key it doesn't know, so if the envelope
 ever gains a field, deploy the model drivers before the airlock.
 
+`is_model_vocabulary` 0.5.0 also adds a fifth `ModelTurn` case,
+`NamedToolsDefined`, and `ModelRequest.namedTools`, so an exhaustive
+switch over `ModelTurn` won't compile until it handles them. A driver that
+can't offer named tools should refuse such a request (`NothingRan`), not
+drop them: dropping them would hide tools from the model. Its refusal
+messages are worded differently too (`signIn` is not a string, rather than
+`modelCall.signIn: not a string`), which matters to anything that matches
+the text.
+
 **`CarriesOutActions` is gone.** It was an empty marker that only the
 airlock used, to pick a driver out of a list by its type. In its place,
 take one optional slot per kind of driver, such as
