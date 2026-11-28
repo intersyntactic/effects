@@ -5,7 +5,6 @@ import 'package:is_model_vocabulary/is_model_vocabulary.dart';
 import 'package:is_sign_in_vocabulary/is_sign_in_vocabulary.dart';
 import 'package:is_web_address_vocabulary/is_web_address_vocabulary.dart';
 
-import 'bot_pool.dart';
 import 'file.dart';
 import 'model.dart';
 import 'outcome.dart';
@@ -411,16 +410,6 @@ ModelAndSignIn decodeModelAndSignIn(
     signIn: decodeModelSignInName(map['signIn'], '$field.signIn'),
     model: decodeModelName(map['model'], '$field.model'),
   );
-}
-
-// BotPool
-
-Object? encodeBotPool(BotPool pool) => pool.name;
-
-BotPool decodeBotPool(Object? json, [String field = 'botPool']) {
-  final raw = _string(json, field);
-  return BotPool.parse(raw) ??
-      (throw FormatException('$field: not a bot pool ($raw)'));
 }
 
 // ModelUsage and ModelReply: is_model_vocabulary's own JSON, under the names
