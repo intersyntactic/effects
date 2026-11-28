@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.21.0
+
+Discontinued, and holds nothing. Every type moved to a vocabulary of its
+own action, with its JSON unchanged: `is_outcome_vocabulary`,
+`is_relative_path_vocabulary`, `is_file_request_vocabulary`,
+`is_program_request_vocabulary`, `is_web_request_vocabulary`,
+`is_model_vocabulary` 0.5.0 and `is_sign_in_vocabulary` 0.1.2. `Progress`
+is split into `Printed` and `ReplyArriving`, `ProgramMessage` is
+`ProgramMessage<P, O>`, and `CarriesOutActions` is gone. The README has
+the table of where each type went and what changed shape.
+
 ## 0.20.0
 
 Breaking: `BotPool`, `encodeBotPool` and `decodeBotPool` are gone. They

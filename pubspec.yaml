@@ -1,22 +1,14 @@
 name: is_effects
 description: >-
-  The shared vocabulary of intersyntactic's actions: what reading, writing,
-  starting a program and reaching the world take and give back, and the
-  drivers that carry them out.
-version: 0.20.0
+  Discontinued: broken up into one vocabulary per action
+  (is_outcome_vocabulary, is_file_request_vocabulary,
+  is_program_request_vocabulary, is_web_request_vocabulary and others).
+  This release holds nothing; the README says where each type went.
+version: 0.21.0
 repository: https://github.com/intersyntactic/effects
 
 environment:
   sdk: ^3.13.0
 
-dependencies:
-  is_model_vocabulary: ^0.4.0
-  is_path_confinement: ^0.1.0
-  is_sign_in_vocabulary: ^0.1.0
-  is_web_address_vocabulary: ^0.1.1
-  path: ^1.9.1
-
 dev_dependencies:
-  analyzer: ^14.7.0
   lints: ^6.1.0
-  test: ^1.25.0

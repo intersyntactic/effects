@@ -1,62 +1,67 @@
-# is_effects
+# is_effects (discontinued)
 
-The shared vocabulary of intersyntactic's actions: what a tool's action
-describes, the airlock decides on, and a driver carries out.
+`is_effects` held the types of every action at once: files, programs, web
+requests, the model, and what each gives back. So a change to any one of
+them made every package that depended on it move and release together.
+It is now broken up into one vocabulary per action, and this last release
+holds nothing.
 
-A driver is given only the action's program and input; the trajectory,
-the decision and what follows stay with `is_airlock_api`.
+Depend on the vocabularies directly. The JSON of every type is the same as
+before, so anything already recorded or sent still reads back.
 
-## What an action takes and gives back
+## Where each type went
 
-- `RelativePath`: a path relative to a driver's root, normalised by its
-  constructor. Whether it may leave that root — by its text, or by a
-  symlink only the disk can show — is the operator's choice, enforced by
-  the driver.
-- Reading and writing: `FileText` in, `ReadResult` (`ReadText`,
-  `ReadMissing`) and `Wrote` out.
-- Starting a program: a `ProgramName` (made only by `parse`, no whitespace)
-  and `Args`, giving an `ExecResult`, which is `Exited(exitCode)` or
-  `Killed(why)`, each with stdout and stderr. How long a program may run,
-  and when it is killed, is the driver's.
-- Reaching the world: an `Origin` (scheme, host and port only), a
-  `WebPath` (made only by `parse`: a leading `/`, no authority, no `..`
-  or `@`, so a path can never name somewhere other than where it was
-  decided to go) and an optional `SignIn` by name, with a
-  `ProposedRequest` (method, path, headers by `validatedHeaders`, which
-  refuses a credential, and an optional body), which the airlock decides.
-  A `GrantedRequest` is one it granted under a `PathPrefix`: the web
-  driver's input, giving a `WebResponse`
-  (`status`, and either `created` or, for a non-2xx reply,
-  `refusedBecause`).
-- Calling the model: a `ModelSignInName` by name (never the secret) and a
-  `ModelName` (a model id, such as `claude-opus-5-5`), with the exact
-  system prompt and request the airlock approved, giving a `ModelReply`:
-  `FinishedReply` (the model's whole text) or `CutOffReply` (the call ran
-  and spent tokens, but the reply ended before the model was done) —
-  a closed set, so a caller can't treat a cut-off answer as the model's
-  full word just because it forgot to check. Both carry `usage` (a
-  `ModelUsage`, null when the driver can't report one).
-- `Outcome<O>`, split on whether the world changed: `Ran(output)`;
-  `NothingRan(why)`, where nothing happened (a deny, no driver, bad
-  input); or `StoppedPartway(why, done)`, never safe to retry, where
-  `done` is the action's own output for what had already happened (the
-  responses to the requests already sent), or null when that isn't
-  known. An outcome recorded as `refused` before the split reads back as
-  `StoppedPartway` with `done` null.
-- `Progress`: what a driver reports while it works, `Printed` for a
-  program's output, `ReplyArriving` for a piece of the model's reply as
-  it streams — never recorded; only the whole `ModelReply` is.
+| Was in `is_effects` | Now in |
+|---|---|
+| `Outcome`, `Ran`, `NothingRan`, `StoppedPartway`, `encodeOutcome` / `decodeOutcome` | [`is_outcome_vocabulary`](https://pub.dev/packages/is_outcome_vocabulary) ^0.1.0 |
+| `ProgramMessage<O>`, `Reported`, `Finished` | `is_outcome_vocabulary`, as `ProgramMessage<P, O>` (see below) |
+| `RelativePath` and its codec | [`is_relative_path_vocabulary`](https://pub.dev/packages/is_relative_path_vocabulary) ^0.1.0 |
+| `FileText`, `FileRequest`, `ReadResult`, `BytesReadResult`, `Wrote`, `ReadsAndWritesFiles` | [`is_file_request_vocabulary`](https://pub.dev/packages/is_file_request_vocabulary) ^0.1.0 |
+| `ProgramName`, `Args`, `ProgramRequest`, `ExecResult`, `RunsPrograms`, `ListsInstalledPrograms`, the `ProgramToRun` codec | [`is_program_request_vocabulary`](https://pub.dev/packages/is_program_request_vocabulary) ^0.1.0 |
+| `Printed`, `Channel` (were cases of `Progress`) | `is_program_request_vocabulary`, with `encodePrinted` / `decodePrinted` |
+| `Method`, `ProposedRequest`, `GrantedRequest`, `BodyToKeep`, `ResponseBody`, `RedirectedTo`, `WebResponse`, `validatedHeaders`, `CarriesOutWebRequests` | [`is_web_request_vocabulary`](https://pub.dev/packages/is_web_request_vocabulary) ^0.1.0 |
+| `ModelName`, `ModelSignInName`, `ModelAndSignIn`, the `ModelCall` envelope, `AsksTheModel` | [`is_model_vocabulary`](https://pub.dev/packages/is_model_vocabulary) ^0.5.0 (see below) |
+| `ReplyArriving` (was a case of `Progress`) | `is_model_vocabulary` ^0.5.0 |
+| `BotPool` and its codec | [`is_sign_in_vocabulary`](https://pub.dev/packages/is_sign_in_vocabulary) ^0.1.2, from `package:is_sign_in_vocabulary/bot_pool.dart` |
+| `CarriesOutActions` | gone (see below) |
 
-A trajectory's prompts are made by its own loop, which holds no model
-sign-in and reaches the model only through `AsksTheModel`, never
-directly — the model is outside the station.
+## What changed shape
 
-## Drivers
+**Progress is split by action.** `Progress` put a program's `Printed` line
+and a model's `ReplyArriving` piece in one sealed class, so a model driver
+could report a printed line. Each now lives with its own action, and
+`Report` is gone:
 
-`ReadsAndWritesFiles`, `RunsPrograms` (reporting progress as it goes),
-`CarriesOutWebRequests` and `AsksTheModel`. A machine loads the drivers
-it can run: a phone's loads no `RunsPrograms`.
+- `RunsPrograms.runProgram` takes `required void Function(Printed printed) report`.
+- `AsksTheModel.askTheModel` takes `required void Function(ReplyArriving piece) report`.
+- `encodeProgress` / `decodeProgress` are gone. Use `encodePrinted` /
+  `decodePrinted`, or `ReplyArriving`'s `toJson` / `fromJson`. Each keeps
+  the `kind` it had, so a deployed driver's lines read the same.
 
-The library imports only `path` and `is_path_confinement` outside the SDK;
-a test reads every directive's URI from Dart's parse tree and holds it to
-that.
+**`ProgramMessage` is generic over the report too:** `ProgramMessage<P, O>`.
+`encodeProgramMessage(message, encodeProgress, encodeOutput)` and
+`decodeProgramMessage(json, decodeProgress, decodeOutput)` take the
+report's codec as well as the output's. A program driver's answer is
+`ProgramMessage<Printed, ExecResult>`; a model call's is
+`ProgramMessage<ReplyArriving, ModelReply>`.
+
+**The model types use `toJson` / `fromJson`**, as the rest of
+`is_model_vocabulary` does, and their decoders are strict:
+
+| Was | Now |
+|---|---|
+| `encodeModelCall(signIn, model, systemPrompt, request)` | `ModelCall(signIn:, model:, systemPrompt:, request:).toJson()` |
+| `decodeModelCall(json)`, a four-field record | `ModelCall.fromJson(json)`, a class; refuses an unknown key |
+| `encodeModelAndSignIn` / `decodeModelAndSignIn` | `toJson()` / `ModelAndSignIn.fromJson` |
+| `encodeModelSignInName(n)` / `encodeModelName(m)` | `n.name` / `m.value` |
+| `decodeModelSignInName` / `decodeModelName` | `ModelSignInName.parse` / `ModelName.parse`, null when invalid |
+| `encodeModelUsage` / `encodeModelReply` and their decoders | `toJson()` / `ModelUsage.fromJson` / `ModelReply.fromJson` |
+
+`ModelCall.fromJson` refuses a key it doesn't know, so if the envelope
+ever gains a field, deploy the model drivers before the airlock.
+
+**`CarriesOutActions` is gone.** It was an empty marker that only the
+airlock used, to pick a driver out of a list by its type. In its place,
+take one optional slot per kind of driver, such as
+`({ReadsAndWritesFiles? files, RunsPrograms? programs, CarriesOutWebRequests? web, AsksTheModel? model})`,
+so two drivers of one kind can't be handed over and one silently ignored.
