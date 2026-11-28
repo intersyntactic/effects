@@ -12,7 +12,6 @@
 /// from those packages directly.
 library;
 
-export 'src/bot_pool.dart';
 export 'src/drivers.dart';
 export 'src/file.dart';
 export 'src/model.dart';

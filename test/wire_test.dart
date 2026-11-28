@@ -592,17 +592,6 @@ void main() {
     });
   });
 
-  group('BotPool', () {
-    test('round-trips', () {
-      final pool = BotPool.parse('teams')!;
-      expect(decodeBotPool(encodeBotPool(pool)), pool);
-    });
-
-    test('refuses an invalid name', () {
-      expect(() => decodeBotPool('Teams Pool'), throwsFormatException);
-    });
-  });
-
   group('ModelAndSignIn', () {
     final pair = ModelAndSignIn(
       signIn: ModelSignInName.parse('nick-claude-team')!,

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.20.0
+
+Breaking: `BotPool`, `encodeBotPool` and `decodeBotPool` are gone. They
+live, unchanged, in `is_sign_in_vocabulary` 0.1.1 beside `SignIn`: import
+them from there. The first piece of is_effects to move out to the
+vocabulary it belongs in.
+
 ## 0.19.0
 
 Breaking: on `is_model_vocabulary` ^0.4.0, and through it `checked_json`
