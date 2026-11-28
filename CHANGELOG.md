@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.19.0
+
+Breaking: on `is_model_vocabulary` ^0.4.0, and through it `checked_json`
+^0.4.0, whose `JsonObject` can't be changed all the way down. The
+`JsonObject`s in `ToolInput`, `ProviderContinuation` and `ModelRequest`
+are now that type. No code here changed.
+
 ## 0.18.0
 
 Breaking: on `is_model_vocabulary` ^0.3.0, and through it `checked_json`
